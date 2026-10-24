@@ -14,7 +14,7 @@ manifest 的 `_MANIFEST_CACHE`、deps 的 pacman/fc-list/GI/AUR 助手缓存、g
 ## 验证哲学：纯本地秒级收归，零云端 CI 依赖
 
 commit `b470af0` 彻底移除了 GitHub Actions 工作流。Nyxuri 的所有契约测试与静态检查**纯粹收归本地**：
-- **零网络秒级测试**：纯 Python 标准库 + 离线 unittest，400+ 项测试在普通笔记本上 10 秒内跑完。
+- **零网络秒级测试**：纯 Python 标准库 + 离线 unittest，千余项测试在普通笔记本上 20 秒内跑完。
 - **免非 Arch 杂音**：避免了在非 Arch 环境（如 Ubuntu Actions Runner）上因依赖缺失和包管理器模拟产生的虚假报错与调试熵增。
 - **改动必测门禁**：所有提交必须通过本地 `compileall` + `unittest` + 沙箱隔离部署。
 
@@ -49,9 +49,15 @@ argv[0]（shebang 直启下是解释器名，不是脚本名），验证恒假�
 | 系统安装模式探测 | System / Repo / Standalone 三模式识别与 PATH 遮蔽警告 | `tests/deploy/test_system_mode.py` |
 | 硬件诊断与驱动中立 | PCI 设备分类、默认不强制 NVIDIA 环境变量、跨应用隔离 | `tests/deploy/test_hardware.py` |
 | i18n 完整性约束 | AST 符号 vs `translations.toml`，无孤儿、无缺失，参数对齐 | `tests/test_i18n.py` |
+| 市场 App 与终端基座 | 零依赖基座（宽度对齐 / 单键确认 / 行式多选）、账本投影缓存失效、动作后终端交接、屏幕 Pilot 冒烟、架构单向与旧界面死刑 | `tests/market/`, `tests/test_ux.py` |
 | 包管理抽象与 Shelly 适配 | 后端分流、超时控制、取消不重试、Shelly 解析 | `tests/pkg/test_pkg.py`, `tests/pkg/test_deps.py` |
 | 划词翻译工具 | 渠道协议与解析、定位几何、ResultRelay、凭据脱敏、TUI（含 PTY）、Alt+E / Orbit 入口契约；经 `tests/tools/translate/support.py` 套 `TempEnv` | `tests/tools/translate/` |
 | 网络弹性 | HTTP 超时、多镜像回退、网络中断软降级 | `tests/pkg/test_network.py` |
+
+**Textual 层测试**：`tests/market/` 的屏幕测试挂 `skipUnless(python-textual)`——没装依赖的
+机器全量单测照绿；`app.suspend()` 在无头 Pilot 下替换为 identity，不真的交出终端。
+架构测试钉死单向依赖：textual 只许出现在 `nyxuri/market/`，`data` / `actions` / `gate`
+常驻无头，引擎不反向 import market，`tui.py` 与 `installer/menus.py` 物理缺席。
 
 ## 必跑命令
 

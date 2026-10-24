@@ -16,7 +16,8 @@ from nyxuri.core import (
     register_temp_path,
 )
 from nyxuri.core import msg
-from nyxuri.tui import CheckboxEntry, CheckboxList, Menu, MenuItem, prompt_confirm, truncate_display
+from nyxuri.core import msg
+from nyxuri.ux import prompt_confirm, truncate_display
 
 
 _MANAGED_SNAPSHOT_RE = re.compile(
@@ -157,13 +158,6 @@ def _read_snapshot_note(backup: Path) -> str:
     return truncate_display(text, 50, suffix="...")
 
 
-def _snapshot_label(index: int, backup: Path) -> str:
-    """Build a compact selectable label with an optional user note."""
-    note = _read_snapshot_note(backup)
-    suffix = f" - {note}" if note else ""
-    return f"[{index}] {backup.name}{suffix}"
-
-
 def list_backups() -> List[Path]:
     """Display a numbered list of all available snapshots."""
     backups = get_all_backups()
@@ -199,16 +193,11 @@ def rollback_configs(target_arg: str = "") -> bool:
         if not sys.stdin.isatty():
             print(msg("rollback_invalid_num"))
             return False
-        items = [
-            MenuItem(label=_snapshot_label(idx, b))
-            for idx, b in enumerate(backups, start=1)
-        ]
-        items.append(MenuItem(label=msg("menu_opt0"), style="subtle"))
-        choice = Menu("rollback_select_title", items, hint_key="rollback_select_hint", compact=True).run()
-        if choice == len(items) - 1:
-            print(msg("delete_cancelled"))
-            return False
-        chosen_backup = backups[choice]
+        # Degraded CLI form (T2): the picker lives in the market App's
+        # snapshot screen; here the list is already on screen — point at it.
+        print(msg("usage_rollback_index"))
+        print(msg("interactive_hint_market"))
+        return False
 
     if not chosen_backup.is_dir() or chosen_backup.is_symlink():
         print(msg("rollback_source_missing", chosen_backup.name), file=sys.stderr)
@@ -275,17 +264,11 @@ def delete_backup(target_arg: str = "") -> bool:
             return False
         selected = [chosen_backup]
     elif sys.stdin.isatty():
-        entries = [
-            CheckboxEntry(key=str(index), label=_snapshot_label(index, backup))
-            for index, backup in enumerate(backups, start=1)
-        ]
-        chosen_keys = CheckboxList(
-            "delete_snapshot_title", entries, hint_key="delete_snapshot_hint"
-        ).run()
-        if chosen_keys is None:
-            print(msg("delete_cancelled"))
-            return False
-        selected = [backups[int(key) - 1] for key in chosen_keys]
+        # Degraded CLI form (T2): the multi-picker lives in the market App's
+        # snapshot screen; the numbered list is already printed above.
+        print(msg("usage_delete_index"))
+        print(msg("interactive_hint_market"))
+        return False
     else:
         print(msg("delete_invalid_num"))
         return False

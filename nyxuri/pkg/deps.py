@@ -10,15 +10,7 @@ from nyxuri.core import log_msg
 from nyxuri.core import msg
 from nyxuri.deploy.manifest import discover_manifest_apps
 from nyxuri.pkg.catalog import CatalogEntry, catalog_entries, get_entry
-from nyxuri.tui import (
-    CategoryAppEntry,
-    CategoryCheckboxList,
-    CategoryGroup,
-    CheckboxEntry,
-    CheckboxList,
-    pad_display,
-    prompt_confirm,
-)
+from nyxuri.ux import pad_display, prompt_confirm, select_many
 
 from nyxuri import pkg
 from nyxuri.pkg import FLATHUB_REMOTE_URL
@@ -179,25 +171,27 @@ def install_selected_deps(selected_deps: List[str]) -> bool:
 
 
 def run_dep_menu_loop() -> bool:
-    """Open interactive checkbox list for core dependencies."""
+    """Install missing core dependencies (degraded line form, T2).
+
+    The old full-screen checklist lives on as the market App's deps screen;
+    here: disclose what is missing, one confirm, install.
+    """
     if not sys.stdin.isatty():
         print(msg("interactive_terminal_required"), file=sys.stderr)
         return False
 
     status_map = check_all_deps()
-    entries = []
-    for dep in CORE_DEPS:
-        is_inst = status_map[dep]
-        status_tag = msg("installed") if is_inst else msg("missing")
-        label = f"{pad_display(dep, 24)} {status_tag}"
-        entries.append(CheckboxEntry(key=dep, label=label, checked=not is_inst))
-
-    chk = CheckboxList("dep_menu_title", entries, hint_key="dep_menu_hint")
-    chosen = chk.run()
-    if not chosen:
+    missing = [dep for dep, installed in status_map.items() if not installed]
+    if not missing:
+        for dep in CORE_DEPS:
+            print(f"  {pad_display(dep, 24)} {msg('installed')}")
+        return True
+    for dep in missing:
+        print(f"  {pad_display(dep, 24)} {msg('missing')}")
+    if not prompt_confirm("cli_confirm_install", "y"):
         return True
     print(msg("installing_selected"))
-    return bool(install_selected_deps(chosen))
+    return bool(install_selected_deps(missing))
 
 def install_optional_apps(selected_apps: List[str]) -> bool:
     """Install the package declarations of the selected supply items.
@@ -265,40 +259,49 @@ def _supply_items() -> List[dict]:
     return items
 
 
-def run_optional_apps_menu_loop() -> bool:
-    """Open the category accordion checklist for recommended applications."""
-    if not sys.stdin.isatty():
-        print(msg("interactive_terminal_required"), file=sys.stderr)
-        return False
+def supply_status() -> List[dict]:
+    """_supply_items + an installed verdict per item.
 
+    One shape for the CLI line picker and the market App's apps screen —
+    neither re-derives where a declaration came from or what proves it.
+    """
     probe = DependencyProbe()
-    grouped: Dict[str, List[CategoryAppEntry]] = {}
+    out = []
     for item in _supply_items():
         is_inst = probe.installed(item["detect"])
         if not is_inst and item["flat"]:
             is_inst = all(fid in probe.flatpaks for fid in item["flat"])
-        entry = CategoryAppEntry(
-            key=item["key"],
-            label=msg(f"app_{item['key'].replace('-', '_')}"),
-            checked=False,
-            installed=is_inst,
-            source_tag="Flatpak" if item["flat"] else "",
-        )
-        grouped.setdefault(item["category"] or "other", []).append(entry)
+        entry = dict(item)
+        entry["installed"] = is_inst
+        out.append(entry)
+    return out
 
-    # Discovery is name-sorted: categories and entries inside each group
-    # are both plain alphabetical — zero curated order to maintain.
-    cat_order = sorted(grouped)
 
-    cat_groups = [
-        CategoryGroup(key=cat, label=msg(f"apps_cat_{cat}"), entries=grouped[cat])
-        for cat in cat_order
-    ]
+def run_optional_apps_menu_loop() -> bool:
+    """Install recommended apps (degraded line form, T2).
 
-    chk = CategoryCheckboxList("opt_apps_menu_title", cat_groups, hint_key="opt_apps_menu_hint")
-    chosen = chk.run()
-    if chosen:
-        install_optional_apps(chosen)
-    else:
+    The category accordion lives in the market App's apps screen; here the
+    numbered line picker (ux.select_many) keeps the verb alive on the CLI.
+    """
+    if not sys.stdin.isatty():
+        print(msg("interactive_terminal_required"), file=sys.stderr)
+        return False
+
+    items = supply_status()
+    labels = []
+    for item in items:
+        status = msg("installed") if item["installed"] else msg("missing")
+        flat_tag = " · Flatpak" if item["flat"] else ""
+        app_key = item["key"].replace("-", "_")
+        labels.append(f"{msg(f'app_{app_key}')}  {status}{flat_tag}")
+
+    print(msg("opt_apps_menu_title").strip())
+    picks = select_many(labels)
+    if picks is None:
         print(msg("opt_apps_none_selected"))
-    return True
+        return True
+    chosen = [items[i]["key"] for i in picks]
+    if not chosen:
+        print(msg("opt_apps_none_selected"))
+        return True
+    return bool(install_optional_apps(chosen))

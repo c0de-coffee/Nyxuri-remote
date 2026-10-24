@@ -355,11 +355,13 @@ def _quiet(fn, *args, **kwargs):
 
 
 class TestDepsMenuReportsFailure(unittest.TestCase):
+    """The degraded line form (T2): missing disclosure + confirm + install."""
 
     def test_failed_install_propagates(self):
         import nyxuri.pkg.deps as deps
         with TempEnv():
-            with patch.object(deps.CheckboxList, "run", return_value=["fish"]), \
+            with patch.object(deps, "check_all_deps", return_value={"fish": False}), \
+                 patch.object(deps, "prompt_confirm", return_value=True), \
                  patch.object(deps, "install_selected_deps", return_value=False), \
                  patch.object(deps.sys.stdin, "isatty", return_value=True):
                 self.assertFalse(_quiet(deps.run_dep_menu_loop))
@@ -367,6 +369,16 @@ class TestDepsMenuReportsFailure(unittest.TestCase):
     def test_empty_selection_is_success(self):
         import nyxuri.pkg.deps as deps
         with TempEnv():
-            with patch.object(deps.CheckboxList, "run", return_value=[]), \
+            with patch.object(deps, "check_all_deps", return_value={"fish": True}), \
                  patch.object(deps.sys.stdin, "isatty", return_value=True):
                 self.assertTrue(_quiet(deps.run_dep_menu_loop))
+
+    def test_declined_confirm_installs_nothing(self):
+        import nyxuri.pkg.deps as deps
+        with TempEnv():
+            with patch.object(deps, "check_all_deps", return_value={"fish": False}), \
+                 patch.object(deps, "prompt_confirm", return_value=False), \
+                 patch.object(deps, "install_selected_deps") as install, \
+                 patch.object(deps.sys.stdin, "isatty", return_value=True):
+                self.assertTrue(_quiet(deps.run_dep_menu_loop))
+                install.assert_not_called()

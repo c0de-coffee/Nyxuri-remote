@@ -3,7 +3,7 @@
 import shutil
 import subprocess
 import sys
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from nyxuri.core import SUPPORTED_WMS, detect_preferred_wm
 from nyxuri.core import get_env, log_msg
@@ -23,8 +23,7 @@ from nyxuri.deploy.deploy import (
 from nyxuri.pkg.deps import get_missing_deps, install_selected_deps
 from nyxuri.kernel import transaction
 from nyxuri.core import msg
-from nyxuri.tui import MenuItem, Menu, prompt_confirm
-from nyxuri.installer.menus import run_master_component_menu
+from nyxuri.ux import prompt_confirm
 from nyxuri.deploy.atomic import CarryPolicy
 
 def _phase_preflight_check(
@@ -120,34 +119,66 @@ def _carried_groups(items: List[str], policy: Optional[CarryPolicy]) -> Dict[str
     return groups
 
 
-def install_configs_workflow(mode: str = "full") -> bool:
-    """Full execution pipeline for dotfiles, dependencies, wallpapers, and hooks."""
+def default_selection() -> Dict:
+    """The parameterized default selection: every component, preferred WM,
+    wallpapers only when the pack is absent, no backup.
+
+    Shared by the non-TTY path, the degraded CLI confirm, and the App's
+    components screen as its starting point.
+    """
+    all_items = discover_config_items()
+    preferred_wm = detect_preferred_wm()
+    chosen_configs = [
+        item for item in all_items
+        if item not in SUPPORTED_WMS or item == preferred_wm
+    ]
+    return {
+        "configs": chosen_configs,
+        "wallpapers": not wallpapers_pack_present(),
+        "backup": False,
+    }
+
+
+def _disclose_selection(mode: str, chosen: Dict) -> None:
+    """Line-form disclosure of what a deploy is about to touch."""
+    print(msg("preflight_express_summary"))
+    print(msg("preflight_comp_config", len(chosen["configs"])))
+    if chosen["wallpapers"]:
+        print(msg("preflight_comp_assets"))
+    if mode == "full":
+        print(msg("preflight_comp_deps"))
+    if chosen["backup"]:
+        print(msg("preflight_comp_backup"))
+
+
+def install_configs_workflow(mode: str = "full", chosen: Optional[Dict] = None) -> bool:
+    """Full execution pipeline for dotfiles, dependencies, wallpapers, and hooks.
+
+    Selection was split from execution (T2): interactive selection lives in
+    the market App's components screen; a ``chosen`` dict may be injected by
+    any surface. Without one, the parameterized defaults apply — on a TTY
+    behind a one-shot disclosure confirm (the degraded CLI form), silently
+    otherwise.
+    """
     if mode == "full" and not shutil.which("pacman"):
         print(msg("distro_unsupported"))
         print(msg("distro_unsupported_hint"))
         return False
-    if sys.stdin.isatty():
-        chosen_dict = run_master_component_menu(is_update=False, mode=mode)
-        if not chosen_dict:
-            print(msg("install_cancelled"))
-            return True
+    if chosen is None:
+        chosen = default_selection()
+        if sys.stdin.isatty():
+            _disclose_selection(mode, chosen)
+            if not prompt_confirm("cli_confirm_install", "y"):
+                print(msg("install_cancelled"))
+                return True
 
-        chosen_configs = chosen_dict["configs"]
-        do_wallpapers = chosen_dict["wallpapers"]
-        do_backup = chosen_dict["backup"]
+    chosen_configs = chosen["configs"]
+    do_wallpapers = chosen["wallpapers"]
+    do_backup = chosen["backup"]
 
-        if not chosen_configs and not do_wallpapers:
-            print(msg("install_cancelled"))
-            return True
-    else:
-        all_items = discover_config_items()
-        preferred_wm = detect_preferred_wm()
-        chosen_configs = [
-            item for item in all_items
-            if item not in SUPPORTED_WMS or item == preferred_wm
-        ]
-        do_wallpapers = not wallpapers_pack_present()
-        do_backup = False
+    if not chosen_configs and not do_wallpapers:
+        print(msg("install_cancelled"))
+        return True
 
     # Safety: ensure at most one WM is selected
     selected_wms = [c for c in chosen_configs if c in SUPPORTED_WMS]
@@ -235,6 +266,73 @@ def install_configs_workflow(mode: str = "full") -> bool:
     return True
 
 
+def execute_update_deploy(chosen: Dict) -> bool:
+    """Deploy a chosen component set through the update-grade carry (#139).
+
+    The execution half of the update choice (was the interactive menu's
+    option 1 body); the App's update screen and the degraded CLI both land
+    here with their own ``chosen``.
+    """
+    if not chosen["configs"] and not chosen["wallpapers"]:
+        print(msg("log_no_components_selected"))
+        return True
+    print(msg("upgrading_selected"))
+    carry_policy = _update_carry_policy(chosen["configs"])
+    preserved: List[str] = []
+    if chosen["configs"]:
+        failed_items = deploy_selected_configs(
+            do_backup=chosen["backup"],
+            items_to_deploy=chosen["configs"],
+            preserved_log=preserved,
+            carry_policy=carry_policy,
+        )
+        if failed_items:
+            render_completion_screen("update", chosen_items=chosen["configs"], preserved_lines=preserved, failed_items=failed_items)
+            return False
+    wallpaper_ok = None
+    if chosen["wallpapers"]:
+        wallpaper_ok = _enable_wallpapers()
+    transaction.replay_enabled_hooks()
+    _resnapshot_after_deploy(chosen["configs"], carry_policy)
+    _finish_successful_deploy(
+        "update",
+        chosen_items=chosen["configs"],
+        preserved_lines=preserved,
+        wallpaper_ok=wallpaper_ok,
+        notice_lines=_ghost_notices(chosen["configs"], carry_policy),
+        carried_groups=_carried_groups(chosen["configs"], carry_policy),
+    )
+    return True
+
+
+def view_update_diff() -> None:
+    """Page the living-area vs blueprint diff (update choice: 查看改动)."""
+    print(msg("diff_viewer_title"))
+    config_items = discover_config_items()
+    diff_cmds = []
+    for it in config_items:
+        src = config_item_src(it)
+        dest = config_item_dest(it)
+        if src.exists() and dest.exists():
+            diff_cmds.append(["diff", "-urN", "--color=always", str(dest), str(src)])
+    if diff_cmds:
+        if shutil.which("less"):
+            pager = subprocess.Popen(["less", "-R"], stdin=subprocess.PIPE, text=True)
+            for cmd in diff_cmds:
+                if pager.poll() is not None:
+                    break
+                subprocess.run(cmd, stdout=pager.stdin, stderr=subprocess.STDOUT, check=False)
+            if pager.stdin:
+                try:
+                    pager.stdin.close()
+                except (BrokenPipeError, OSError):
+                    pass
+            pager.wait()
+        else:
+            for cmd in diff_cmds:
+                subprocess.run(cmd, check=False)
+
+
 def offer_overwrite_upgrade(flag: str = "") -> bool:
     """Handle update flow: ask to deploy changes, view diff, or code update only.
 
@@ -290,76 +388,14 @@ def offer_overwrite_upgrade(flag: str = "") -> bool:
         )
         return True
 
-    # Interactive choice menu
-    items = [
-        MenuItem(label=msg("overwrite_opt1")),
-        MenuItem(label=msg("overwrite_opt2")),
-        MenuItem(label=msg("overwrite_opt3"), style="subtle"),
-    ]
-    menu = Menu("overwrite_title", items, hint_key="submenu_hint")
-    choice = menu.run()
-
-    if choice == 0:
-        chosen = run_master_component_menu(is_update=True, mode="full")
-        if chosen:
-            if not chosen["configs"] and not chosen["wallpapers"]:
-                print(msg("log_no_components_selected"))
-                return True
-            print(msg("upgrading_selected"))
-            carry_policy = _update_carry_policy(chosen["configs"])
-            preserved: List[str] = []
-            if chosen["configs"]:
-                failed_items = deploy_selected_configs(
-                    do_backup=chosen["backup"],
-                    items_to_deploy=chosen["configs"],
-                    preserved_log=preserved,
-                    carry_policy=carry_policy,
-                )
-                if failed_items:
-                    render_completion_screen("update", chosen_items=chosen["configs"], preserved_lines=preserved, failed_items=failed_items)
-                    return False
-            wallpaper_ok = None
-            if chosen["wallpapers"]:
-                wallpaper_ok = _enable_wallpapers()
-            transaction.replay_enabled_hooks()
-            _resnapshot_after_deploy(chosen["configs"], carry_policy)
-            _finish_successful_deploy(
-                "update",
-                chosen_items=chosen["configs"],
-                preserved_lines=preserved,
-                wallpaper_ok=wallpaper_ok,
-                notice_lines=_ghost_notices(chosen["configs"], carry_policy),
-                carried_groups=_carried_groups(chosen["configs"], carry_policy),
-            )
-            return True
-    elif choice == 1:
-        print(msg("diff_viewer_title"))
-        config_items = discover_config_items()
-        diff_cmds = []
-        for it in config_items:
-            src = config_item_src(it)
-            dest = config_item_dest(it)
-            if src.exists() and dest.exists():
-                diff_cmds.append(["diff", "-urN", "--color=always", str(dest), str(src)])
-        if diff_cmds:
-            if shutil.which("less"):
-                pager = subprocess.Popen(["less", "-R"], stdin=subprocess.PIPE, text=True)
-                for cmd in diff_cmds:
-                    if pager.poll() is not None:
-                        break
-                    subprocess.run(cmd, stdout=pager.stdin, stderr=subprocess.STDOUT, check=False)
-                if pager.stdin:
-                    try:
-                        pager.stdin.close()
-                    except (BrokenPipeError, OSError):
-                        pass
-                pager.wait()
-            else:
-                for cmd in diff_cmds:
-                    subprocess.run(cmd, check=False)
-    else:
+    # Interactive choice, degraded to the line form (T2): the full
+    # three-way chooser with component selection and the diff pager lives
+    # in the market App's update screen.
+    if not prompt_confirm("update_confirm_deploy", "n"):
         print(msg("log_config_deploy_skipped"))
-    return True
+        print(msg("update_diff_hint"))
+        return True
+    return execute_update_deploy(default_selection())
 
 
 def check_new_deps_post_update() -> None:

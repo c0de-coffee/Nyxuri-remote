@@ -10,16 +10,6 @@ en = "{Colors.BOLD_RED}[Not installed]{Colors.RESET}"
 zh = "{Colors.BOLD_CYAN}[运行中]{Colors.RESET}"
 en = "{Colors.BOLD_CYAN}[Running]{Colors.RESET}"
 
-[menu_title]
-zh = """\n  {Colors.BOLD_CYAN}── {PROJECT_NAME} 控制面板 ──{Colors.RESET}
-"""
-en = """\n  {Colors.BOLD_CYAN}── {PROJECT_NAME} Control Panel ──{Colors.RESET}
-"""
-
-[menu_group_deploy]
-zh = "  {Colors.BOLD_BLUE}部署{Colors.RESET}"
-en = "  {Colors.BOLD_BLUE}Setup{Colors.RESET}"
-
 [menu_opt1]
 zh = "应用配置"
 en = "Apply configs"
@@ -31,14 +21,6 @@ en = "Switch preset"
 [menu_opt2]
 zh = "软件与依赖"
 en = "Software & dependencies"
-
-[menu_group_maint]
-zh = "  {Colors.BOLD_BLUE}管理{Colors.RESET}"
-en = "  {Colors.BOLD_BLUE}Manage{Colors.RESET}"
-
-[menu_group_system]
-zh = "  {Colors.BOLD_BLUE}诊断{Colors.RESET}"
-en = "  {Colors.BOLD_BLUE}Diagnostics{Colors.RESET}"
 
 [menu_opt3]
 zh = "快照管理"
@@ -52,43 +34,15 @@ en = "Check updates"
 zh = "系统诊断"
 en = "System diagnostics"
 
-[menu_opt6]
-zh = "导出报告"
-en = "Export report"
-
 [menu_opt7]
 zh = "卸载"
 en = "Uninstall"
-
-[menu_opt0]
-zh = "退出"
-en = "Exit"
 
 [snapshot_menu_title]
 zh = """\n  {Colors.BOLD_CYAN}── 快照管理 ──{Colors.RESET}
 """
 en = """\n  {Colors.BOLD_CYAN}── Snapshot Management ──{Colors.RESET}
 """
-
-[snapshot_sub_create]
-zh = "创建快照"
-en = "Create snapshot"
-
-[snapshot_sub_list]
-zh = "查看快照列表"
-en = "List snapshots"
-
-[snapshot_sub_delete]
-zh = "删除快照"
-en = "Delete snapshots"
-
-[snapshot_sub_rollback]
-zh = "回滚快照"
-en = "Restore snapshot"
-
-[snapshot_sub_back]
-zh = "返回"
-en = "Back"
 
 [status_wallpapers_installed]
 zh = "{Colors.BOLD_GREEN}[已下载]{Colors.RESET}"
@@ -194,65 +148,9 @@ en = "[!] pacman not found: this does not look like an Arch-based distribution"
 zh = "依赖安装通过 pacman 与 AUR 完成，在别的发行版上无法自动进行。配置文件仍可手动取用：仓库 units/ 目录下的内容按普通 dotfiles 复制到 ~/.config 即可，壁纸在 units/wallpapers。欢迎来仓库 Issue 说说你的发行版，人多了会考虑支持。"
 en = "{PROJECT_NAME} installs its dependencies through pacman and the AUR, which is not available here. You can still take the configs manually: copy whatever you need from the repository units/ directory into ~/.config like ordinary dotfiles, wallpapers live in units/wallpapers. Feel free to open an Issue and tell us your distro, support may come if there is demand."
 
-[deps_menu_unsupported]
-zh = "[!] 未检测到 pacman，依赖菜单仅适用于 Arch 系发行版。配置可以手动从仓库 units/ 复制到 ~/.config 使用。"
-en = "[!] pacman not found: the dependency menus only apply to Arch-based systems. You can still copy configs manually from the repository units/ directory into ~/.config."
-
-[summary_action_title]
-zh = """\n  {Colors.BOLD_CYAN}── 下一步 ──{Colors.RESET}
-"""
-en = """\n  {Colors.BOLD_CYAN}── Next steps ──{Colors.RESET}
-"""
-
-[summary_action_apps]
-zh = "常用软件"
-en = "Recommended Apps"
-
-[summary_action_star]
-zh = "去 GitHub 点个 Star"
-en = "Star on GitHub"
-
-[summary_action_exit]
-zh = "退出"
-en = "Exit"
-
-[summary_action_hint]
-zh = "  {Colors.DARK_GRAY}[↑/↓/j/k] 移动  [Enter/Space] 选择  [0/q] 退出{Colors.RESET}"
-en = "  {Colors.DARK_GRAY}[↑/↓/j/k] Move  [Enter/Space] Select  [0/q] Exit{Colors.RESET}"
-
-[summary_action_hint_short]
-zh = "  {Colors.DARK_GRAY}[↑/↓] 移动  [Enter] 选择  [q] 退出{Colors.RESET}"
-en = "  {Colors.DARK_GRAY}[↑/↓] Move  [Enter] Select  [q] Exit{Colors.RESET}"
-
-[msg_star_opened]
-zh = """\n  {Colors.BOLD_GREEN}[✓] 感谢支持！已打开项目主页：{Colors.RESET} {0}
-"""
-en = """\n  {Colors.BOLD_GREEN}[✓] Thanks for your support! Opened repository:{Colors.RESET} {0}
-"""
-
 [test_start]
 zh = """\n{Colors.BOLD_BLUE}:: [test] 幂等测试部署 (跳过备份与依赖检查)…{Colors.RESET}"""
 en = """\n{Colors.BOLD_BLUE}:: [test] Idempotent test deploy (skipped backup & deps)…{Colors.RESET}"""
-
-[menu_hint]
-zh = """\n  {Colors.DARK_GRAY}[↑/↓/j/k] 移动  [Enter/Space] 选择  [0/q] 退出{Colors.RESET}"""
-en = """\n  {Colors.DARK_GRAY}[↑/↓/j/k] Move  [Enter/Space] Select  [0/q] Exit{Colors.RESET}"""
-
-[menu_hint_short]
-zh = """\n  {Colors.DARK_GRAY}[↑/↓] 移动  [Enter] 选择  [q] 退出{Colors.RESET}"""
-en = """\n  {Colors.DARK_GRAY}[↑/↓] Move  [Enter] Select  [q] Exit{Colors.RESET}"""
-
-[submenu_hint]
-zh = """\n  {Colors.DARK_GRAY}[↑/↓/j/k] 移动  [Enter/Space] 选择  [0/q] 返回{Colors.RESET}"""
-en = """\n  {Colors.DARK_GRAY}[↑/↓/j/k] Move  [Enter/Space] Select  [0/q] Back{Colors.RESET}"""
-
-[submenu_hint_short]
-zh = """\n  {Colors.DARK_GRAY}[↑/↓] 移动  [Enter] 选择  [q] 返回{Colors.RESET}"""
-en = """\n  {Colors.DARK_GRAY}[↑/↓] Move  [Enter] Select  [q] Back{Colors.RESET}"""
-
-[checklist_hint_short]
-zh = "  {Colors.DARK_GRAY}[↑/↓] 移动  [Space] 勾选  [Enter] 确认  [Esc] 取消{Colors.RESET}"
-en = "  {Colors.DARK_GRAY}[↑/↓] Move  [Space] Toggle  [Enter] Confirm  [Esc] Cancel{Colors.RESET}"
 
 [press_any_key]
 zh = """\n按任意键继续…"""
@@ -287,10 +185,6 @@ en = "View changes"
 [overwrite_opt3]
 zh = "仅更新代码"
 en = "Update code only"
-
-[selective_hint]
-zh = "  {Colors.DARK_GRAY}[↑/↓/j/k] 移动  [Space] 切换  [a] 全选  [n] 清空  [Enter] 确认  [Esc] 取消{Colors.RESET}"
-en = "  {Colors.DARK_GRAY}[↑/↓/j/k] Move  [Space] Toggle  [a] All  [n] None  [Enter] Confirm  [Esc] Cancel{Colors.RESET}"
 
 [clean_menu_title]
 zh = "缓存清理 — 勾选要清理的项目，回车执行"
@@ -440,26 +334,6 @@ en = "{Colors.BOLD_YELLOW}[!] No configuration snapshots found{Colors.RESET}"
 zh = """\n{Colors.BOLD_CYAN}:: 可用快照列表{Colors.RESET}"""
 en = """\n{Colors.BOLD_CYAN}:: Available {PROJECT_NAME} Snapshots{Colors.RESET}"""
 
-[rollback_select_title]
-zh = """\n  {Colors.BOLD_CYAN}── 选择要恢复的快照 ──{Colors.RESET}
-"""
-en = """\n  {Colors.BOLD_CYAN}── Select Snapshot to Restore ──{Colors.RESET}
-"""
-
-[rollback_select_hint]
-zh = "  {Colors.DARK_GRAY}[↑/↓/j/k] 移动  [Enter] 确认回滚  [Esc/q] 取消{Colors.RESET}"
-en = "  {Colors.DARK_GRAY}[↑/↓/j/k] Move  [Enter] Confirm Rollback  [Esc/q] Cancel{Colors.RESET}"
-
-[delete_snapshot_title]
-zh = """\n  {Colors.BOLD_CYAN}── 选择要删除的快照 ──{Colors.RESET}
-"""
-en = """\n  {Colors.BOLD_CYAN}── Select Snapshots to Delete ──{Colors.RESET}
-"""
-
-[delete_snapshot_hint]
-zh = "  {Colors.DARK_GRAY}[↑/↓/j/k] 移动  [Space] 勾选  [a] 全选  [n] 清空  [Enter] 确认  [Esc] 取消{Colors.RESET}"
-en = "  {Colors.DARK_GRAY}[↑/↓/j/k] Move  [Space] Toggle  [a] All  [n] None  [Enter] Confirm  [Esc] Cancel{Colors.RESET}"
-
 [rollback_invalid_num]
 zh = "{Colors.BOLD_RED}[✗] 无效序号，已取消回滚{Colors.RESET}"
 en = "{Colors.BOLD_RED}[✗] Invalid selection{Colors.RESET}"
@@ -524,33 +398,11 @@ en = "{Colors.BOLD_RED}[✗] Failed to delete snapshot: {0}{Colors.RESET}"
 zh = "{Colors.BOLD_GREEN}[✓] 已删除 {0} 个快照，剩余 {1} 个{Colors.RESET}"
 en = "{Colors.BOLD_GREEN}[✓] Deleted {0} snapshots, {1} remaining{Colors.RESET}"
 
-[deps_menu_title]
-zh = """\n  {Colors.BOLD_CYAN}── 软件与依赖 ──{Colors.RESET}
-"""
-en = """\n  {Colors.BOLD_CYAN}── Software & Dependencies ──{Colors.RESET}
-"""
-
-[deps_sub_core]
-zh = "核心依赖"
-en = "Core dependencies"
-
-[deps_sub_apps]
-zh = "常用软件"
-en = "Recommended apps"
-
-[deps_sub_back]
-zh = "返回"
-en = "Back"
-
 [dep_menu_title]
 zh = """\n  {Colors.BOLD_CYAN}── 核心依赖 ──{Colors.RESET}
 """
 en = """\n  {Colors.BOLD_CYAN}── Core Dependencies ──{Colors.RESET}
 """
-
-[dep_menu_hint]
-zh = "  {Colors.DARK_GRAY}[↑/↓/j/k] 移动  [Space] 切换  [a] 全选  [n] 清空  [Enter] 安装  [0/q] 返回{Colors.RESET}"
-en = "  {Colors.DARK_GRAY}[↑/↓/j/k] Move  [Space] Toggle  [a] All  [n] None  [Enter] Install  [0/q] Back{Colors.RESET}"
 
 [installing_selected]
 zh = """\n{Colors.BOLD_BLUE}:: 正在安装选中依赖…{Colors.RESET}"""
@@ -561,10 +413,6 @@ zh = """\n  {Colors.BOLD_CYAN}── 常用软件 ──{Colors.RESET}
 """
 en = """\n  {Colors.BOLD_CYAN}── Recommended Apps ──{Colors.RESET}
 """
-
-[opt_apps_menu_hint]
-zh = "  {Colors.DARK_GRAY}[↑/↓/j/k] 移动  [←/→] 折叠  [Space] 选择  [a] 全选  [n] 清空  [Enter] 安装  [0/q] 返回{Colors.RESET}"
-en = "  {Colors.DARK_GRAY}[↑/↓/j/k] Move  [←/→] Fold  [Space] Select  [a] All  [n] None  [Enter] Install  [0/q] Back{Colors.RESET}"
 
 [apps_cat_browser]
 zh = "浏览器"
@@ -948,7 +796,6 @@ en = "{Colors.BOLD_RED}[✗] Unknown command: {0}{Colors.RESET}"
 zh = "{Colors.BOLD_RED}[✗] 参数无效。用法: {0}{Colors.RESET}"
 en = "{Colors.BOLD_RED}[✗] Invalid arguments. Usage: {0}{Colors.RESET}"
 
-
 [cli_help]
 zh = """{0} 桌面插件市场 ({1})
 用法: {1} [命令] [参数]
@@ -1032,6 +879,122 @@ en = "Install the missing packages above via the system package manager? [Y/n] "
 [cli_aborted]
 zh = "已取消，未做任何更改。"
 en = "Aborted, nothing changed."
+
+[cli_select_prompt]
+zh = "输入编号（可用 空格/逗号/区间 2-5，all=全选，回车取消）: "
+en = "Enter numbers (space/comma separated, ranges 2-5, all=everything, Enter=cancel): "
+
+[cli_select_invalid]
+zh = "{Colors.BOLD_RED}[✗]{Colors.RESET} 无效的编号输入，已取消。"
+en = "{Colors.BOLD_RED}[✗]{Colors.RESET} Invalid selection input, cancelled."
+
+[update_confirm_deploy]
+zh = "部署配置更新（默认组件集）? [y/N] "
+en = "Deploy the config update (default component set)? [y/N] "
+
+[update_diff_hint]
+zh = "{Colors.DARK_GRAY}查看改动：运行无参 {CLI_CMD} 进入更新屏，或手动 diff 实机与 units/ 目录。{Colors.RESET}"
+en = "{Colors.DARK_GRAY}To view changes: run {CLI_CMD} for the update screen, or diff the living area against units/ yourself.{Colors.RESET}"
+
+[uninstall_confirm_standard]
+zh = "按默认范围卸载（归档配置 + CLI + 已启用单元）? [y/N] "
+en = "Uninstall with the default scope (archive configs + CLI + enabled units)? [y/N] "
+
+[clean_confirm_default]
+zh = "按默认任务集执行清理（TRIM 与 NVIDIA 着色器缓存除外）? [y/N] "
+en = "Run cleanup with the default task set (except TRIM and NVIDIA shader cache)? [y/N] "
+
+[interactive_hint_market]
+zh = "{Colors.DARK_GRAY}交互式操作请直接运行: {CLI_CMD}{Colors.RESET}"
+en = "{Colors.DARK_GRAY}For interactive flows, just run: {CLI_CMD}{Colors.RESET}"
+
+[usage_rollback_index]
+zh = "用法: {CLI_CMD} rollback <编号>（编号见上方列表，或 {CLI_CMD} snapshot list）"
+en = "Usage: {CLI_CMD} rollback <index> (see the list above, or {CLI_CMD} snapshot list)"
+
+[usage_delete_index]
+zh = "用法: {CLI_CMD} snapshot delete <编号>（编号见上方列表）"
+en = "Usage: {CLI_CMD} snapshot delete <index> (see the list above)"
+
+[usage_deps_sub]
+zh = "用法: {CLI_CMD} deps <core|apps>（交互式勾选请直接运行 {CLI_CMD}）"
+en = "Usage: {CLI_CMD} deps <core|apps> (for interactive picking, just run {CLI_CMD})"
+
+[market_deps_apps]
+zh = "常用软件（catalog 目录）"
+en = "Recommended apps (catalog)"
+
+[market_clean]
+zh = "清理缓存"
+en = "Clean caches"
+
+[components_hint]
+zh = "[Space] 勾选/单选  [Enter] 确认部署（终端交接执行）  [q] 返回"
+en = "[Space] Toggle  [Enter] Confirm deploy (terminal handoff)  [q] Back"
+
+[components_deploy]
+zh = "开始部署"
+en = "Deploy"
+
+[components_install_scope]
+zh = "按以上勾选部署？部署管线将在终端中运行。"
+en = "Deploy the selection above? The pipeline runs in the terminal."
+
+[components_update_scope]
+zh = "按以上勾选更新（用户改动与自放文件原样搬入）？"
+en = "Update the selection above (your changes and files are carried)?"
+
+[components_deploy_done]
+zh = "部署完成"
+en = "Deploy finished"
+
+[components_deploy_failed]
+zh = "部署有失败项，见终端输出"
+en = "Deploy had failures — see the terminal output"
+
+[deps_core_hint]
+zh = "[i] 安装缺失项（终端交接执行）  [r] 刷新  [q] 返回"
+en = "[i] Install missing (terminal handoff)  [r] Refresh  [q] Back"
+
+[deps_core_all_present]
+zh = "核心依赖全部在位"
+en = "All core dependencies present"
+
+[deps_apps_hint]
+zh = "[Space] 勾选  [Enter] 安装勾选项  [q] 返回"
+en = "[Space] Toggle  [Enter] Install picked  [q] Back"
+
+[snapshot_hint]
+zh = "[c] 创建快照  [d] 删除  [r] 恢复  [q] 返回"
+en = "[c] Create  [d] Delete  [r] Rollback  [q] Back"
+
+[rollback_confirm]
+zh = "从快照 {0} 恢复？当前配置会先自动保护快照。"
+en = "Roll back from snapshot {0}? The current config is snapshotted first."
+
+[uninstall_run]
+zh = "执行卸载"
+en = "Uninstall"
+
+[uninstall_incomplete]
+zh = "卸载未完成，见终端输出"
+en = "Uninstall incomplete — see the terminal output"
+
+[clean_done]
+zh = "清理完成"
+en = "Cleanup finished"
+
+[clean_failed]
+zh = "清理有警告，见终端输出"
+en = "Cleanup had warnings — see the terminal output"
+
+[update_hint]
+zh = "[Enter] 拉取并更新（更新后界面自动回来）  [d] 查看当前改动  [c] 更新组件  [q] 返回"
+en = "[Enter] Pull & update (the UI returns after)  [d] View current diff  [c] Update components  [q] Back"
+
+[update_confirm_pull]
+zh = "拉取最新代码并更新？更新流程在终端中运行。"
+en = "Pull the latest code and update? The flow runs in the terminal."
 
 [cli_off_blocked]
 zh = "{Colors.BOLD_RED}[✗]{Colors.RESET} {0} 被已启用的依赖方阻断: {1}（显式 --cascade 才级联关闭）"
@@ -1273,7 +1236,6 @@ en = "  {Colors.BOLD_GREEN}[✓]{Colors.RESET} Installed config: ~/.config/{0}"
 zh = "  {Colors.BOLD_GREEN}[✓]{Colors.RESET} 初始化主题与 GTK 同步"
 en = "  {Colors.BOLD_GREEN}[✓]{Colors.RESET} Initialized theme & GTK sync"
 
-
 [log_no_components_selected]
 zh = "未选择任何组件"
 en = "No components selected"
@@ -1508,22 +1470,6 @@ en = """{Colors.BOLD_YELLOW}[!] {0}: active preset '{1}' is no longer in the rep
 zh = "{Colors.BOLD_YELLOW}[!] {0}: 活动预设状态无效，当前 ~/.config/{0} 内容保持冻结，未重新部署{Colors.RESET}"
 en = "{Colors.BOLD_YELLOW}[!] {0}: active preset state is invalid; ~/.config/{0} is frozen, not redeployed{Colors.RESET}"
 
-[preset_switcher_title]
-zh = "预设管理"
-en = "Preset Management"
-
-[preset_switcher_hint]
-zh = "  {Colors.DARK_GRAY}[Enter/→] 进入右栏   [←/Esc] 返回左栏   [Tab] 双栏切换   [s] 保存   [i] 详情   [q] 退出{Colors.RESET}"
-en = "  {Colors.DARK_GRAY}[Enter/→] Enter Right   [←/Esc] Back to Left   [Tab] Switch Pane   [s] Save   [i] Details   [q] Quit{Colors.RESET}"
-
-[preset_switcher_hint_short]
-zh = "  {Colors.DARK_GRAY}[Enter/→] 进   [←] 退   [Tab] 切栏   [s] 存   [i] 详   [q] 退{Colors.RESET}"
-en = "  {Colors.DARK_GRAY}[Enter/→] Enter   [←] Back   [Tab] Switch   [s] Save   [i] Info   [q] Quit{Colors.RESET}"
-
-[preset_status_active]
-zh = "{Colors.BOLD_GREEN}●{Colors.RESET}"
-en = "{Colors.BOLD_GREEN}●{Colors.RESET}"
-
 [preset_prompt_save_name]
 zh = "▸ 新预设名称 (Esc 取消): "
 en = "▸ New preset name (Esc to cancel): "
@@ -1579,17 +1525,25 @@ en = "Desc"
 zh = "选项"
 en = "Options"
 
-[preset_part_active]
-zh = "当前"
-en = "Active"
+[preset_hint]
+zh = "[Tab/←→] 切栏  [Enter] 应用/展开  [s] 保存  [e] 编辑  [d] 删除  [i] 详情  [q] 返回"
+en = "[Tab/←→] Pane  [Enter] Apply/Expand  [s] Save  [e] Edit  [d] Delete  [i] Details  [q] Back"
 
-[preset_part_status_active]
-zh = "生效中"
-en = "Active"
+[preset_left_header]
+zh = "应用列表"
+en = "Applications"
 
-[preset_part_status_inactive]
-zh = "未生效"
-en = "Inactive"
+[preset_right_header]
+zh = "配置详情"
+en = "Details"
+
+[doctor_title]
+zh = "对账 · 声明状态 vs 实机状态"
+en = "Reconciliation · declared vs lived"
+
+[doctor_hint]
+zh = "[s] 系统体检  [b] 导出报告  [r] 刷新  [q] 返回"
+en = "[s] System checkup  [b] Bug report  [r] Refresh  [q] Back"
 
 [install_step_unit_hooks]
 zh = "{Colors.BOLD_CYAN}::{Colors.RESET} 单元钩子重放 ({0})"
@@ -1599,10 +1553,6 @@ en = "{Colors.BOLD_CYAN}::{Colors.RESET} Unit hook replay ({0})"
 zh = "单元工坊（开关 / 对账）"
 en = "Unit Workshop (switch / audit)"
 
-[menu_group_units]
-zh = "── 单元 ──"
-en = "── Units ──"
-
 [workshop_title]
 zh = "单元工坊 — 账本投影 · 单一事务路径"
 en = "Unit Workshop — ledger projection · single transaction path"
@@ -1610,10 +1560,6 @@ en = "Unit Workshop — ledger projection · single transaction path"
 [workshop_left_header]
 zh = "单元 (状态)"
 en = "Unit (state)"
-
-[workshop_right_header]
-zh = "详情"
-en = "Details"
 
 [workshop_hint]
 zh = "[↑/↓] 选择  [o] 启用  [f] 停用  [r] 刷新对账  [q] 返回"
@@ -1623,6 +1569,30 @@ en = "[↑/↓] Select  [o] On  [f] Off  [r] Refresh audit  [q] Back"
 zh = "按任意键返回工坊"
 en = "Press any key to return to the bench"
 
-[workshop_confirm_off]
-zh = "停用该单元?（自定义入保险库，实机抹白）[y/N] "
-en = "Disable this unit? (customs to Vault, living area wiped) [y/N] "
+[workshop_confirm_off_modal]
+zh = "停用该单元？自定义文件入保险库，实机抹白。"
+en = "Disable this unit? Customs go to the Vault, the living area is wiped."
+
+[market_home_title]
+zh = "Nyxuri 市场"
+en = "Nyxuri Market"
+
+[market_home_hint]
+zh = "[↑/↓] 选择  [Enter] 进入  [L] 语言  [Q] 退出"
+en = "[↑/↓] Select  [Enter] Open  [L] Language  [Q] Quit"
+
+[modal_yes]
+zh = "确认"
+en = "Yes"
+
+[modal_no]
+zh = "取消"
+en = "No"
+
+[tui_missing_textual]
+zh = "{Colors.BOLD_YELLOW}[!]{Colors.RESET} 交互界面需要 python-textual：sudo pacman -S python-textual（CLI 动词不受影响）"
+en = "{Colors.BOLD_YELLOW}[!]{Colors.RESET} The interactive market needs python-textual: sudo pacman -S python-textual (CLI verbs are unaffected)"
+
+[tui_install_textual_prompt]
+zh = "现在通过 pacman 安装 python-textual? [Y/n] "
+en = "Install python-textual via pacman now? [Y/n] "

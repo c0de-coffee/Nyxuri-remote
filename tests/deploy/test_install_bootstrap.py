@@ -2,9 +2,10 @@
 
 install.sh is a one-time bootstrap: fetch/verify the tree, then hand off to
 nyxuri/launcher.sh with NO argument passthrough. The launcher is the permanent
-CLI entry and must replicate the pre-KM5 hardening: python3 -I -S -c with the
-repo root injected, so PYTHON*/sitecustomize injection from the launch
-directory can never reach the engine.
+CLI entry and must keep the pre-KM5 hardening: python3 -I -c with the repo root
+injected, so PYTHON* env / user-site / launch-directory injection can never
+reach the engine. ``-S`` was dropped deliberately: it also hid system
+site-packages, i.e. the declared optional dependency (python-textual).
 """
 
 import os
@@ -30,8 +31,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 def _launcher_python_snippet() -> str:
     """The exact -c snippet the launcher execs (single source: the file itself)."""
     src = (REPO_ROOT / "nyxuri" / "launcher.sh").read_text(encoding="utf-8")
-    match = re.search(r"exec python3 -I -S -c '(.*?)' \"\$repo_dir\" \"\$@\"", src, re.DOTALL)
-    assert match, "launcher.sh must exec python3 -I -S -c '<snippet>' \"$repo_dir\" \"$@\""
+    match = re.search(r"exec python3 -I -c '(.*?)' \"\$repo_dir\" \"\$@\"", src, re.DOTALL)
+    assert match, "launcher.sh must exec python3 -I -c '<snippet>' \"$repo_dir\" \"$@\""
     return match.group(1)
 
 
@@ -39,11 +40,11 @@ class TestInstallBootstrap(unittest.TestCase):
     def _fake_tools(self, root: Path, log: Path, exec_real: bool = False) -> Path:
         """Fake python3/git on PATH.
 
-        exec_real=False (bootstrap tests): the -I -S -c launch is logged and
+        exec_real=False (bootstrap tests): the -I -c launch is logged and
         stubbed — the bare handoff would otherwise trigger the interactive
         install workflow (sudo prompts, full deploy) inside the sandbox.
         exec_real=True (launcher tests): the launch is logged and forwarded to
-        the real interpreter, proving PYTHON*/sitecustomize isolation.
+        the real interpreter, proving PYTHON*/user-site isolation.
         """
         bindir = root / "bin"
         bindir.mkdir()
@@ -54,10 +55,9 @@ class TestInstallBootstrap(unittest.TestCase):
                 f"""\
                 #!/bin/sh
                 if [ "$1" = "-I" ] && [ "$2" = "-c" ]; then
-                    for arg do printf '%s\\0' "$arg"; done > {log_path}.version
-                    exec /usr/bin/python3 "$@"
-                fi
-                if [ "$1" = "-I" ] && [ "$2" = "-S" ] && [ "$3" = "-c" ]; then
+                    if [ $# -eq 3 ]; then
+                        exec /usr/bin/python3 "$@"
+                    fi
                     {{
                         printf 'cwd=%s\\0' "$PWD"
                         for arg do printf '%s\\0' "$arg"
@@ -110,10 +110,10 @@ class TestInstallBootstrap(unittest.TestCase):
         launch = self._read_args(log)
         # The bootstrap/launcher never cds into the target; the trusted tree is
         # injected as the first engine argument instead (KM5 launcher contract).
-        self.assertEqual(launch[1:4], ["-I", "-S", "-c"])
-        self.assertEqual(launch[4], _launcher_python_snippet())
-        self.assertEqual(launch[5], str(target.resolve()))
-        self.assertEqual(launch[6:], user_args)
+        self.assertEqual(launch[1:3], ["-I", "-c"])
+        self.assertEqual(launch[3], _launcher_python_snippet())
+        self.assertEqual(launch[4], str(target.resolve()))
+        self.assertEqual(launch[5:], user_args)
         self.assertNotIn("forged", result.stdout)
 
     def _launch_env(self, env, bindir: Path, root: Path, userbase: Path) -> dict[str, str]:

@@ -17,6 +17,7 @@
 - zen-palette 着色器的三个高位 uint 常量触发 Qt shader baker 缺陷（"negative int conversion"）：改为运行时等价拼装，11 个 .qsb 全量可重编
 
 ### Changed
+- 交互式控制面板改用 Textual 重做：仍是运行 `nyxuri` 进入，工坊、预设、组件、依赖、快照、更新、清理、卸载、诊断收进同一个界面，安装与更新等耗时任务在界面内跑完即回到原处；未装 `python-textual` 时给出一行安装提示
 - 上游 Clavis 残留全面单轨化：`CLAVIS_*` 环境变量兼容层、`clavis-*` 临时前缀、托盘/图钉内部 id、`clavis-palette:` 壁纸源前缀全部退役，统一 `NYXURI` / `nyxuri` 命名；`~/.config/niri/clavis/` 托管片段目录自动迁移至 `nyxuri/`
 - AUR 状态对齐：ROADMAP T1 从「阻断/搁置」改为「已上架」，packaging/README 与 humans-wiki Home 安装块同步回填
 - 文档计数修正：软件目录 18 条、单元 13 个（`theme/` 共享模板池此前在目录树中失踪）

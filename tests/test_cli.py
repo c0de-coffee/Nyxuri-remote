@@ -296,8 +296,7 @@ class TestPendingUpgradeBranch(unittest.TestCase):
              patch("nyxuri.cli.offer_overwrite_upgrade", return_value=offer_result) as mock_offer, \
              patch("nyxuri.cli.check_new_deps_post_update") as mock_check, \
              patch("nyxuri.cli.press_any_key"), \
-             patch("nyxuri.cli.select_language"), \
-             patch("nyxuri.cli.main_menu_loop") as mock_menu, \
+             patch("nyxuri.market.run", return_value=0) as mock_market, \
              patch("builtins.print"):
             if tty:
                 try:
@@ -309,7 +308,7 @@ class TestPendingUpgradeBranch(unittest.TestCase):
             else:
                 with self.assertRaises(SystemExit) as ctx:
                     main()
-        return mock_offer, mock_check, mock_menu, ctx
+        return mock_offer, mock_check, mock_market, ctx
 
     def test_pending_flag_deploys_and_exits(self):
         mock_offer, mock_check, _, ctx = self._main_pending({PENDING_UPGRADE_ENV: "--force"})
@@ -323,16 +322,19 @@ class TestPendingUpgradeBranch(unittest.TestCase):
         self.assertEqual(ctx.exception.code, 1)
 
     def test_pending_cli_source_exits_even_interactive(self):
-        _, _, mock_menu, ctx = self._main_pending({PENDING_UPGRADE_ENV: ""}, tty=True)
-        mock_menu.assert_not_called()
+        _, _, mock_market, ctx = self._main_pending({PENDING_UPGRADE_ENV: ""}, tty=True)
+        mock_market.assert_not_called()
         self.assertIsNotNone(ctx)
         self.assertEqual(ctx.code, 0)
 
     def test_pending_menu_source_returns_to_menu(self):
         env = {PENDING_UPGRADE_ENV: "", PENDING_UPGRADE_MENU_ENV: "1"}
-        _, _, mock_menu, ctx = self._main_pending(env, tty=True)
-        mock_menu.assert_called_once()
-        self.assertIsNone(ctx)
+        _, _, mock_market, ctx = self._main_pending(env, tty=True)
+        mock_market.assert_called_once()
+        # The menu path returns into the market App; process exit code is
+        # the App's (0 on a clean close).
+        self.assertIsNotNone(ctx)
+        self.assertEqual(ctx.code, 0)
 
 
 class TestDistroGuard(unittest.TestCase):
@@ -349,12 +351,12 @@ class TestDistroGuard(unittest.TestCase):
         from nyxuri.installer.workflows import install_configs_workflow
 
         with patch("nyxuri.installer.workflows.shutil.which", return_value=None), \
-             patch("nyxuri.installer.workflows.run_master_component_menu") as menu, \
+             patch("nyxuri.installer.workflows.default_selection") as selection, \
              patch("builtins.print") as prn:
             result = install_configs_workflow("full")
 
         self.assertFalse(result)
-        menu.assert_not_called()
+        selection.assert_not_called()
         printed = " ".join(str(c.args[0]) for c in prn.call_args_list)
         self.assertIn("pacman", printed)
 
@@ -363,24 +365,24 @@ class TestDistroGuard(unittest.TestCase):
 
         with patch("nyxuri.installer.workflows.shutil.which", return_value=None), \
              patch("sys.stdin.isatty", return_value=True), \
-             patch("nyxuri.installer.workflows.run_master_component_menu", return_value=None), \
+             patch("nyxuri.installer.workflows.default_selection") as selection, \
+             patch("nyxuri.installer.workflows.prompt_confirm", return_value=False), \
              patch("builtins.print"):
             result = install_configs_workflow("config")
 
-        self.assertTrue(result)  # cancelled-by-user path, not the distro guard
+        # config mode skips the distro guard: the tty path disclosed the
+        # defaults and the user declined — cancelled, not blocked.
+        self.assertTrue(result)
+        selection.assert_called_once()
 
-    def test_deps_menu_blocked_without_pacman(self):
-        from nyxuri.installer.menus import deps_menu_loop
+    def test_deps_no_sub_points_at_market(self):
+        from nyxuri.cli import _cmd_deps
 
-        with patch("sys.stdin.isatty", return_value=True), \
-             patch("nyxuri.installer.menus.shutil.which", return_value=None), \
-             patch("nyxuri.installer.menus.Menu") as menu, \
-             patch("builtins.print") as prn:
-            deps_menu_loop()
-
-        menu.assert_not_called()
+        with patch("builtins.print") as prn:
+            code = _cmd_deps([])
+        self.assertEqual(code, 2)
         printed = " ".join(str(c.args[0]) for c in prn.call_args_list)
-        self.assertIn("pacman", printed)
+        self.assertIn("core", printed)
 
 
 class TestPreflightSudo(unittest.TestCase):

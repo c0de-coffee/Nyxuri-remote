@@ -20,7 +20,7 @@ from nyxuri.core import (
 )
 from nyxuri.core import get_env, log_msg, register_temp_path, timed_run
 from nyxuri.core import msg
-from nyxuri.tui import prompt_confirm
+from nyxuri.ux import prompt_confirm
 
 _GIT_NET = ["-c", "http.lowSpeedLimit=1000", "-c", "http.lowSpeedTime=15", "-c", "http.connectTimeout=10", "-c", "http.timeout=20"]
 

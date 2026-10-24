@@ -14,7 +14,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import nyxuri.core as core
-import nyxuri.tui as tui
+import nyxuri.ux as ux
 from tests.utils import TempEnv
 
 
@@ -332,10 +332,10 @@ class TestRemovePath(unittest.TestCase):
 
 
 class TestRawInputMode(unittest.TestCase):
-    """raw_input_mode no-ops on non-tty stdin (tests rely on this); drain discards bytes."""
+    """_RawKeys no-ops on non-tty stdin (tests rely on this); drain discards bytes."""
 
     def test_noop_on_non_tty_stdin(self):
-        with tui.raw_input_mode(tui.stdin_fd()):
+        with ux._RawKeys():
             pass
         self.assertTrue(True)
 
@@ -348,8 +348,8 @@ class TestRawInputMode(unittest.TestCase):
                 raise io.UnsupportedOperation("redirected stdin is pseudofile")
 
         with patch.object(sys, "stdin", NoFileno()):
-            self.assertIsNone(tui.stdin_fd())
-            with tui.raw_input_mode(tui.stdin_fd()):
+            self.assertIsNone(ux.stdin_fd())
+            with ux._RawKeys():
                 pass
         self.assertTrue(True)
 
@@ -357,11 +357,11 @@ class TestRawInputMode(unittest.TestCase):
         r, w = os.pipe()
         os.write(w, b"abc")
         os.close(w)
-        tui._drain_pending(r)  # must drain "abc" without blocking, then return at EOF
+        ux._drain_fd(r)  # must drain "abc" without blocking, then return at EOF
         self.assertEqual(os.read(r, 64), b"")  # fully drained (EOF)
 
     def test_drain_stdin_noop_on_non_tty(self):
-        tui.drain_stdin()  # guarded by isatty() → no-op, no raise/block
+        ux.drain_stdin()  # guarded by isatty() → no-op, no raise/block
 
 
 if __name__ == "__main__":

@@ -2,8 +2,11 @@
 # ==============================================================================
 # Nyxuri CLI launcher — the permanent entry point. `~/.local/bin/nyxuri` and
 # `/usr/bin/nyxuri` (system package) symlink here; KM5 demoted install.sh to a
-# one-time bootstrap. Hardening: -I ignores PYTHON* env injection, -S skips
-# sitecustomize. XDG normalization parity with the pre-KM5 entry behavior.
+# one-time bootstrap. Hardening: -I ignores PYTHON* env, user site and cwd
+# injection. No -S: system site-packages must stay visible — the declared
+# optional dependency (python-textual) and every pacman python package live
+# there, and -S silently hid them from the gate. XDG normalization parity with
+# the pre-KM5 entry behavior.
 # ==============================================================================
 set -euo pipefail
 
@@ -24,7 +27,7 @@ self="${BASH_SOURCE[0]}"
 resolved="$(readlink -f "$self" 2>/dev/null || echo "$self")"
 repo_dir="$(cd -- "$(dirname -- "$resolved")/.." && pwd)"
 
-exec python3 -I -S -c '
+exec python3 -I -c '
 import sys
 if sys.version_info < (3, 11):
     sys.stderr.write(

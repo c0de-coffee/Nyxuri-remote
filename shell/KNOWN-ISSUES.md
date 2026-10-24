@@ -17,7 +17,7 @@
   工具明示报错降级，不影响启动与其余单元。暂不登记 PKGBUILD optdepends：
   计划由作者收回仓库内化自维护，届时再落依赖关系（gen-deps.py
   `ENGINE_OPTDEPENDS` 准入注释已留位）。
-- [ ] **TUI 未接入**：`menus.py` 无 shell 切换菜单，`translations.toml` 无桌面外壳词条；目前只有 CLI `nyxuri shell` 一条路
+- [ ] **TUI 未接入**：市场 App（`nyxuri/market/`）无 shell 切换屏，`translations.toml` 无桌面外壳词条；目前只有 CLI `nyxuri shell` 一条路
 
 ## 已修复
 

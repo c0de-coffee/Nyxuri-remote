@@ -64,6 +64,7 @@ optdepends=(
   'cliphist: session toolchain'
   'quickshell: Nyxuri Shell runtime'
   'qt6-5compat: Nyxuri Shell visual effects'
+  'python-textual: interactive TUI (nyxuri)'
 )
 # <<< optdepends <<<
 

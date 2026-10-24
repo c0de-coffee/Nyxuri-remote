@@ -20,9 +20,25 @@
 
 ---
 
-## 3. 单元工坊（UnitWorkshop，KM3）
+## 3. 单元工坊（WorkshopScreen，KM3 → T2 实现）
 
 - **双栏零件台**：左栏为单元账本清单（开关状态列），右栏为焦点单元的声明详情（状态 / 预设 / 包 / 依赖 / 特权 / 对账）。窄终端（< 80 列）降级为可用即止，不做双栏强撑。
 - **投影而非状态**：工坊只是 `state.json` 账本在屏幕上的只读投影；开关动作（`o` / `f`）与 CLI 动词走同一条 `transaction` 事务路径，报告复用同一套 Step→prose 文案（`format_steps`），工坊不持有私有状态。
 - **破坏性默认拒绝**：停用（`f`）必须显式确认，默认值为 No；启用（`o`）的包安装披露与 CLI 同源（`unit_package_installer`）。
 - **对账就地刷新**：三态对账（Synced / Drifted / Ghost）按焦点单元惰性计算并缓存，`r` 手动刷新；动作发生后自动失效缓存。
+
+## 4. 市场 App（T2 终态）
+
+- **唯一交互入口**：无参 `nyxuri` 进 App，首页十项各一屏（工坊 / 预设 / 组件清单 /
+  核心依赖 / 可选软件 / 快照 / 更新 / 清理 / 卸载 / 诊断）。CLI 子命令保持参数化
+  行式形态，不跳进 App——两套界面共享引擎与文案键，不共享控制流。
+- **分层单向**：`ux.py` 零依赖基座（对齐 / 单键确认 / 行式多选）→ `market/` 唯一
+  Textual 层（app · data · actions · gate · modals · screens）；`data` / `actions` /
+  `gate` 不 import textual，引擎永不 import market（唯一豁免：`cli.py` 的惰性入口）。
+- **投影在 App，执行交终端**：屏幕只读账本投影；pacman、部署管线、diff pager、
+  `$EDITOR` 一律 `app.suspend()` 交接（期间终端回 cooked，引擎行式 `prompt_confirm`
+  原样可用）。装包判断照抄 CLI：plan → missing → 有缺包才整事务交接；轻动作
+  （无缺包的单元开关、预设 apply）进程内完成。
+- **刷新协议**：屏幕挂载与回栈重读账本；动作后 `data.invalidate()` 统一失效缓存。
+- **缺席守卫**：未装 `python-textual` 时入口打印一行 `pacman -S python-textual`，
+  pacman 在就询问代装，不留旧界面兜底。

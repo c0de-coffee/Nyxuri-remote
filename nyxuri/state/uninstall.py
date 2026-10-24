@@ -11,6 +11,7 @@ import datetime
 import json
 import sys
 from pathlib import Path
+from typing import List, Optional
 
 from nyxuri.core import CLI_CMD, PROJECT_NAME, STORAGE_NAME
 from nyxuri.core import (
@@ -23,8 +24,49 @@ from nyxuri.core import (
     clear_nyxuri_cli_symlink_marker,
 )
 from nyxuri.core import msg
-from nyxuri.tui import CheckboxEntry, CheckboxList, drain_stdin, prompt_confirm
+from nyxuri.ux import drain_stdin, prompt_confirm
 from nyxuri.state.backup import get_all_backups, rollback_configs
+
+# Hook-carrying units offered for `off` during uninstall (§8): their living
+# areas have side effects beyond file placement, so they leave through the
+# transaction's vault+wipe path.
+HOOK_UNITS = ("fcitx5-rime", "fish", "greeter", "noctalia")
+
+
+def uninstall_options() -> List[dict]:
+    """Checkbox rows for the uninstall scope: group headers + items.
+
+    A projection shared by the App's uninstall screen and the default-scope
+    degradation; each row is {key, label, checked, group}.
+    """
+    from nyxuri.deploy.deploy import discover_config_items
+    from nyxuri.kernel import ledger, registry
+
+    items = discover_config_items()
+    enabled_hooked = [
+        uid for uid in HOOK_UNITS
+        if uid in registry.unit_ids()
+        and (ledger.get_unit(uid) or {}).get("state") == "enabled"
+    ]
+
+    rows: List[dict] = [
+        {"group": msg("uninstall_group_user")},
+        {"key": "configs", "label": msg("uninstall_item_configs", len(items)), "checked": True},
+        {"key": "nyx_dir", "label": msg("uninstall_item_nyx_dir"), "checked": False},
+        {"key": "archives", "label": msg("uninstall_item_archives"), "checked": False},
+        {"key": "wallpapers", "label": msg("uninstall_item_wallpapers"), "checked": False},
+        {"group": msg("uninstall_group_self")},
+        {"key": "cli", "label": msg("uninstall_item_cli"), "checked": True},
+        {"key": "state", "label": msg("uninstall_item_state"), "checked": False},
+        {"key": "cache", "label": msg("uninstall_item_cache"), "checked": False},
+    ]
+    if enabled_hooked:
+        rows.append({"group": msg("uninstall_group_units")})
+        rows.extend(
+            {"key": f"unit:{uid}", "label": msg("uninstall_item_unit", uid), "checked": True}
+            for uid in enabled_hooked
+        )
+    return rows
 
 
 def _rm_report(path: Path) -> None:
@@ -36,13 +78,14 @@ def _rm_report(path: Path) -> None:
         print(msg("uninstall_skipped", str(path)))
 
 
-def uninstall_nyxuri(mode: str = "") -> bool:
+def uninstall_nyxuri(mode: str = "", selected: Optional[set] = None) -> bool:
     """Checkbox-style uninstall (§8): the user picks what to remove.
 
-    Defaults = the old 'standard' scope (archive configs + CLI + installed
-    modules, now including greeter + fisher — fixes gaps #4). purge/--all and
-    non-interactive use the same standard scope. Legacy 'restore' rolls back to the origin
-    snapshot (folded into `nyxuri rollback`).
+    Selection was split from execution (T2): the App's uninstall screen
+    passes the picked keys as ``selected``; without them the parameterized
+    standard scope applies — on a TTY behind a destructive confirm, silently
+    otherwise. purge/--all keeps its own always-ask gate. Legacy 'restore'
+    rolls back to the origin snapshot (folded into `nyxuri rollback`).
     """
     from nyxuri.deploy.deploy import config_item_dest, discover_config_items
     from nyxuri.kernel import ledger, registry, transaction
@@ -52,7 +95,7 @@ def uninstall_nyxuri(mode: str = "") -> bool:
 
     # --- Legacy mode aliases ---
     if mode in ("1", "safe", "--safe", "standard"):
-        mode = ""  # interactive checkbox (or all+archive when non-TTY)
+        mode = ""  # default scope (all+archive when non-TTY)
     elif mode in ("2", "--restore", "restore"):
         # Restore folded into `nyxuri rollback`; kept as a legacy alias.
         backups = get_all_backups()
@@ -69,35 +112,9 @@ def uninstall_nyxuri(mode: str = "") -> bool:
     # --- KM3: unit switches replace the module checkboxes. Enabled units
     # with living-area side effects are offered through `off` (cascade off),
     # which vaults customs and wipes to white paper.
-    HOOK_UNITS = ("fcitx5-rime", "fish", "greeter", "noctalia")
-    enabled_hooked = [
-        uid for uid in HOOK_UNITS
-        if uid in registry.unit_ids()
-        and (ledger.get_unit(uid) or {}).get("state") == "enabled"
-    ]
-
-    # --- Build checkbox entries (defaults = standard scope) ---
-    entries = [
-        CheckboxEntry(key="__sep_user__", label=msg("uninstall_group_user"), is_separator=True),
-        CheckboxEntry(key="configs", label=msg("uninstall_item_configs", len(items)), checked=True),
-        CheckboxEntry(key="nyx_dir", label=msg("uninstall_item_nyx_dir"), checked=False),
-        CheckboxEntry(key="archives", label=msg("uninstall_item_archives"), checked=False),
-        CheckboxEntry(key="wallpapers", label=msg("uninstall_item_wallpapers"), checked=False),
-        CheckboxEntry(key="__sep_self__", label=msg("uninstall_group_self"), is_separator=True),
-        CheckboxEntry(key="cli", label=msg("uninstall_item_cli"), checked=True),
-        CheckboxEntry(key="state", label=msg("uninstall_item_state"), checked=False),
-        CheckboxEntry(key="cache", label=msg("uninstall_item_cache"), checked=False),
-    ]
-    unit_entries = [
-        CheckboxEntry(key=f"unit:{uid}", label=msg("uninstall_item_unit", uid), checked=True)
-        for uid in enabled_hooked
-    ]
-    if unit_entries:
-        entries.append(CheckboxEntry(key="__sep_mod__", label=msg("uninstall_group_units"), is_separator=True))
-        entries.extend(unit_entries)
-
-    all_keys = [e.key for e in entries if not e.is_separator]
-    default_keys = [e.key for e in entries if not e.is_separator and e.checked]
+    rows = uninstall_options()
+    all_keys = [r["key"] for r in rows if "key" in r]
+    default_keys = [r["key"] for r in rows if r.get("checked")]
 
     # --- Resolve the selected key set + whether configs are archived ---
     if mode == "all":
@@ -109,19 +126,21 @@ def uninstall_nyxuri(mode: str = "") -> bool:
                 print(msg("purge_cancelled"))
                 return False
             print(msg("purge_start"))
+    elif selected is not None:
+        # Injected by the App's uninstall screen.
+        archive_configs = True
     elif not sys.stdin.isatty():
-        # Non-interactive (pipe) → the same standard defaults as the checklist.
+        # Non-interactive (pipe) → the same standard defaults.
         selected = set(default_keys)
         archive_configs = True
     else:
-        # Interactive checkbox.
-        chk = CheckboxList("uninstall_title", entries, hint_key="uninstall_hint")
-        chosen = chk.run()
-        if chosen is None:
+        # Degraded CLI form (T2): standard scope behind a destructive
+        # confirm — the full checklist lives in the market App.
+        selected = set(default_keys)
+        archive_configs = True
+        if not prompt_confirm("uninstall_confirm_standard", "n", destructive=True):
             print(msg("log_uninstall_cancelled"))
             return False
-        selected = set(chosen)
-        archive_configs = True
 
     # --- Execute (inherited purge order; §8.6) ---
     # Snapshot pre-existing archives first: if 'configs' archives this run AND
@@ -142,6 +161,8 @@ def uninstall_nyxuri(mode: str = "") -> bool:
     # 1. Enabled hook units FIRST — `off` vaults customs and wipes to white
     #    paper (side-domain cleanup via each unit's post_remove hook).
     #    nyx_dir/state must outlive these.
+    enabled_hooked = [r["key"].removeprefix("unit:") for r in rows
+                      if r.get("key", "").startswith("unit:")]
     for uid in enabled_hooked:
         if f"unit:{uid}" in selected:
             try:

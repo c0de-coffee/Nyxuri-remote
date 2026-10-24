@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 from nyxuri.core import CLI_CMD, Colors, PROJECT_NAME, text
-from nyxuri.tui import CheckboxEntry, CheckboxList, display_width, pad_display, stdin_fd
+from nyxuri.ux import display_width, pad_display, prompt_confirm
 
 VERSION = "4.1"
 
@@ -70,10 +70,8 @@ HELP = f"""{PROJECT_NAME} — {t("缓存清理", "Cache sweeper")}
   --only <a,b,...>    {t("非交互执行指定任务（免确认），all = 全部", "run only these tasks (no prompts); all = everything")}
   -h, --help          {t("显示本帮助", "show this help")}
 
-{t("交互模式：↑/↓/j/k 移动，Space 勾选，a 全选，n 清空，Enter 执行，Esc/q 取消。",
-   "Interactive: ↑/↓/j/k move, Space toggle, a all, n none, Enter run, Esc/q cancel.")}
-{t("默认全选（TRIM 与 NVIDIA 着色器缓存除外）。", "All on by default (except TRIM and NVIDIA shader cache).")}
-
+{t("无 --only 的交互模式按默认任务集执行（TRIM 与 NVIDIA 着色器缓存除外，确认后运行）；完整勾选清单在无参 {0} 的清理屏。",
+   "Without --only, interactive mode runs the default task set (except TRIM and NVIDIA shader cache) after one confirm; the full checklist lives in the clean screen of bare {0}.").format(CLI_CMD)}
 {t("任务 key：", "Task keys:")} {", ".join(TASK_KEYS)}
 
 {t("所有删除目标被限制在缓存、回收站等白名单目录内，绝不会触碰 $HOME 本身。",
@@ -425,22 +423,54 @@ def _big_folders():
         print("  " + t(f"HOME 总计 {human(total)}", f"HOME total {human(total)}"))
 
 
-# ---------- 勾选 UI（tui.CheckboxList 原语，KM3.5 接管） ----------
+# ---------- 勾选 UI 已退役（T2）：交互勾选归 market App 的 clean 屏 ----------
 
-def _checkbox(tasks):
-    """交互勾选。返回选中 key 列表；Esc/q 取消返回 None。"""
-    if stdin_fd() is None:
-        return None  # no usable tty: never guess consent
-    entries = [
-        CheckboxEntry(
-            key=x["key"],
-            label=f"{x['label']}  {x['target']}  {human(x['size']) if x['size'] else '—'}",
-            checked=x["key"] not in DEFAULT_OFF,
-        )
-        for x in tasks
-    ]
-    chosen = CheckboxList("clean_menu_title", entries, hint_key="clean_menu_hint").run()
-    return chosen
+
+# ---------- 选择段拆分（T2）：发现 / 选择 / 执行 ----------
+
+def discover_clean_tasks():
+    """Read-only task discovery: returns (tasks, sizes, flat_roots).
+
+    Both the CLI and the market App's clean screen call this; sizes cost a
+    ``du`` walk, so it runs once per invocation, not per frame.
+    """
+    flat_roots = flatpak_cache_roots()
+    measured = _measured_roots(flat_roots)
+    sizes = {p: du(p) for p in measured}
+    return build_tasks(sizes, flat_roots), sizes, flat_roots
+
+
+def default_task_keys(tasks):
+    """The default set: everything except DEFAULT_OFF (TRIM 慢、nv 重编译)."""
+    return [x["key"] for x in tasks if x["key"] not in DEFAULT_OFF]
+
+
+def execute_clean_tasks(tasks, before=0, sizes=None, flat_roots=None):
+    """Run the chosen tasks in order (user first, elevated after sudo -v)."""
+    user = [x for x in tasks if not x["sudo"]]
+    sys_tasks = [x for x in tasks if x["sudo"]]
+    for x in user:
+        _run_task(x)
+    if _elevate(sys_tasks):
+        for x in sys_tasks:
+            _run_task(x)
+    else:
+        for x in sys_tasks:
+            print("  " + _c("2", "- " + x["label"]))
+
+    _big_folders()
+
+    print()
+    print("  " + "─" * 44)
+    measured = _measured_roots(flat_roots or [])
+    after = sum(du(p) or 0 for p in measured)
+    freed = max(0, before - after)
+    print("  " + _c("1;32", t(f"共回收 {human(freed)}", f"Recovered {human(freed)}")))
+    if WARN_COUNT:
+        print("  " + _c("33", t(f"（{WARN_COUNT} 处警告，见上方）",
+                               f"({WARN_COUNT} warning(s), see above)")))
+    _pause()
+    return 0
 
 
 # ---------- 执行 ----------
@@ -537,12 +567,9 @@ def main(argv):
         return 1
     _print_title()
 
-    flat_roots = flatpak_cache_roots()
-    measured = _measured_roots(flat_roots)
-    sizes = {p: du(p) for p in measured}
+    tasks, sizes, flat_roots = discover_clean_tasks()
     before = sum(v or 0 for v in sizes.values())
 
-    tasks = build_tasks(sizes, flat_roots)
     if not tasks:
         print(t("  没有可清理的项目。", "  Nothing to clean."))
         return 0
@@ -567,14 +594,13 @@ def main(argv):
             return 0
         _print_plan(chosen)
     elif sys.stdin.isatty():
-        keys = _checkbox(tasks)
-        if keys is None:
+        # Degraded CLI form (T2): default task set behind one confirm; the
+        # full checklist lives in the market App's clean screen.
+        chosen = [x for x in tasks if x["key"] not in DEFAULT_OFF]
+        _print_plan(chosen)
+        if not prompt_confirm("clean_confirm_default", "y"):
             print(t("\n已取消，未做任何改动。", "\nCancelled. Nothing was changed."))
             return 1
-        chosen = [x for x in tasks if x["key"] in keys]
-        if not chosen:
-            print(t("  未选择任何项目，未做任何改动。", "  Nothing selected. Nothing was changed."))
-            return 0
     else:
         _print_plan(tasks)
         print()
@@ -583,29 +609,7 @@ def main(argv):
         return 1
 
     print()
-    user = [x for x in chosen if not x["sudo"]]
-    sys_tasks = [x for x in chosen if x["sudo"]]
-    for x in user:
-        _run_task(x)
-    if _elevate(sys_tasks):
-        for x in sys_tasks:
-            _run_task(x)
-    else:
-        for x in sys_tasks:
-            print("  " + _c("2", "- " + x["label"]))
-
-    _big_folders()
-
-    print()
-    print("  " + "─" * 44)
-    after = sum(du(p) or 0 for p in measured)
-    freed = max(0, before - after)
-    print("  " + _c("1;32", t(f"共回收 {human(freed)}", f"Recovered {human(freed)}")))
-    if WARN_COUNT:
-        print("  " + _c("33", t(f"（{WARN_COUNT} 处警告，见上方）",
-                               f"({WARN_COUNT} warning(s), see above)")))
-    _pause()
-    return 0
+    return execute_clean_tasks(chosen, before=before, sizes=sizes, flat_roots=flat_roots)
 
 
 if __name__ == "__main__":

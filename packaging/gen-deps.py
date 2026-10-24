@@ -48,6 +48,9 @@ ENGINE_OPTDEPENDS = [
     # quickshell does not depend on it — a bare quickshell install alone would
     # render the Shell's surfaces without effects. (chroot namcap finding)
     ("qt6-5compat", "Nyxuri Shell visual effects"),
+    # T2: the interactive market App is the only declared third-party
+    # dependency; every CLI verb runs without it (gate degrades with a hint).
+    ("python-textual", "interactive TUI (nyxuri)"),
 ]
 
 

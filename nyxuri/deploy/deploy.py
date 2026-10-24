@@ -9,14 +9,12 @@ assets (wallpapers), manifest (app discovery), preset
 import os
 import shutil
 import sys
-import time
-from contextlib import ExitStack
 from typing import List, Optional
 
-from nyxuri.core import Colors, REPO_URL, THEME_ENGINE
+from nyxuri.core import Colors, THEME_ENGINE
 from nyxuri.core import get_env, log_msg, timed_run
 from nyxuri.core import msg
-from nyxuri.tui import read_key, responsive_hint, show_logo, raw_input_mode, _drain_pending
+from nyxuri.ux import show_logo
 
 from nyxuri.deploy.atomic import (
     CarryPolicy,
@@ -416,52 +414,16 @@ def render_completion_screen(
         sys.stdout.write(f"    {msg('summary_next_panel')}\n\n")
         return
 
-    # Interactive Next Steps Menu
-    from nyxuri.pkg.deps import run_optional_apps_menu_loop
-    focus = 0
-    sys.stdout.write(Colors.CURSOR_HIDE)
-    fd = sys.stdin.fileno()
-    stack = ExitStack()
-    stack.enter_context(raw_input_mode(fd))
-    try:
-        _drain_pending(fd)
-        while True:
-            sys.stdout.write(Colors.CLEAR_SCREEN)
-            show_logo()
-            _render_body()
-
-            sys.stdout.write(msg("summary_action_title"))
-            from nyxuri.tui import render_menu_item
-            render_menu_item(0, msg("summary_action_apps"), focus)
-            render_menu_item(1, msg("summary_action_star"), focus)
-            render_menu_item(2, msg("summary_action_exit"), focus, style="subtle")
-
-            sys.stdout.write(f"\n{responsive_hint('summary_action_hint')}\n")
-            sys.stdout.flush()
-
-            key = read_key()
-            if key in ("UP", "k", "K"):
-                focus = 2 if focus <= 0 else focus - 1
-            elif key in ("DOWN", "j", "J"):
-                focus = 0 if focus >= 2 else focus + 1
-            elif key in ("ENTER", "SPACE"):
-                if focus == 0:
-                    run_optional_apps_menu_loop()
-                elif focus == 1:
-                    star_url = REPO_URL.removesuffix(".git")
-                    if shutil.which("xdg-open"):
-                        timed_run(["xdg-open", star_url], 5, check=False)
-                    print(msg("msg_star_opened", star_url))
-                    time.sleep(1.2)
-                elif focus == 2:
-                    break
-            elif key in ("0", "q", "Q", "ESC", "EXIT"):
-                break
-    finally:
-        _drain_pending(fd, debounce=True)
-        stack.close()
-        sys.stdout.write(Colors.CURSOR_SHOW)
-        sys.stdout.flush()
+    # Interactive render (T2): the summary lands in scrollback as-is. The
+    # old full-screen "next steps" menu retired with the pre-Textual widget
+    # layer — optional apps now live behind the market App's deps screen
+    # (`nyxuri` → 可选应用) and `nyxuri deps apps`.
+    _render_body()
+    sys.stdout.write(f"\n  {Colors.BOLD_WHITE}{msg('summary_section_next')}{Colors.RESET}\n")
+    sys.stdout.write(f"    {msg('summary_next_start')}\n")
+    sys.stdout.write(f"    {msg('summary_next_manual')}\n")
+    sys.stdout.write(f"    {msg('summary_next_panel')}\n\n")
+    sys.stdout.flush()
 
 def deploy_selected_configs(
     do_backup: bool = False,

@@ -33,7 +33,7 @@ Nyxuri 是桌面插件市场，不是安装器；安装器只是它的一次性�
 ```
 Nyxuri = 内核（registry · resolver · transaction · ledger）
        + 目录（万物皆单元，manifest 全量声明）
-       + 市场（TUI 目录浏览器为主界面，CLI 等价动词）
+       + 市场（Textual App 目录浏览器为主界面，CLI 等价动词）
 
 单元 = kitty 配置 / fcitx 皮肤 / greeter / 壁纸包 / Shell 域 / ……
 状态 = off ↔ on 原子切换：切换前快照 + 准确披露，切换后交报告
@@ -54,4 +54,5 @@ Nyxuri = 内核（registry · resolver · transaction · ledger）
 
 - **底座先行、契约冻结**：先搭齐底层公共接口与测试样本并冻结契约，再逐一接入具体桌面业务。
 - **一切皆可选 (Everything is Optional)**：Shell 与合成器（Niri、Hyprland 等）按需组装，不强制死锁单一组件。
-- **纯标准库驱动**：守护纯 Python 标准库零依赖基准，保证 `arch=('any')` 免编译分发与秒级测试闭环。
+- **纯标准库驱动**：引擎核心守护纯 Python 标准库零依赖基准，保证 `arch=('any')` 免编译分发与秒级测试闭环；
+  唯一声明依赖是交互层 `python-textual`（optdepends，缺席时 CLI 全功能），依赖方向单向：market → ux + 引擎。

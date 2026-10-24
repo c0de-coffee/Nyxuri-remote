@@ -1,7 +1,8 @@
 """Regression tests for terminal text width, clipping, and clean.py helpers."""
 
-import io
 import contextlib
+import io
+import os
 import sys
 import unicodedata
 import unittest
@@ -9,7 +10,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from nyxuri.core import Colors
-from nyxuri.tui import display_width, render_check_row, render_menu_item, truncate_display
+from nyxuri.ux import display_width, truncate_display
 
 
 def _reference_width(text: str) -> int:
@@ -56,22 +57,6 @@ class TestTruncateDisplay(unittest.TestCase):
         self.assertEqual(truncate_display("abc", 5), "abc")
 
 
-class TestRowRendering(unittest.TestCase):
-    def _row(self, fn, *args, **kwargs):
-        buffer = io.StringIO()
-        with contextlib.redirect_stdout(buffer):
-            fn(*args, **kwargs)
-        return buffer.getvalue().split("\n")[0].replace("\033[K", "")
-
-    def test_rows_never_exceed_terminal_width(self):
-        label = "中文🙂\u200d mixed label"
-        for cols in (1, 2, 3, 4, 6, 9, 12, 20, 80):
-            row = self._row(render_check_row, True, "[✓]", label, cols=cols)
-            self.assertLessEqual(display_width(row), cols, f"check row at cols={cols}")
-            row = self._row(render_menu_item, 0, label, 0, cols=cols)
-            self.assertLessEqual(display_width(row), cols, f"menu row at cols={cols}")
-
-
 class TestCleanHelpers(unittest.TestCase):
     def test_tilde_only_shortens_paths_actually_below_home(self):
         import nyxuri.desktop.clean as clean
@@ -83,8 +68,14 @@ class TestCleanHelpers(unittest.TestCase):
             self.assertEqual(clean.tilde("/home/username/secret"), "/home/username/secret")
             self.assertEqual(clean.tilde("/home/users/data"), "/home/users/data")
 
-    def test_interactive_helpers_survive_stdin_without_fileno(self):
+    def test_line_form_prompts_survive_stdin_without_fileno(self):
+        """The ux line-form prompts must not crash on a pseudo stdin.
+
+        A redirected stdin with isatty()=True but no fileno used to crash
+        the raw-mode guard; prompt_confirm must degrade to its default.
+        """
         import nyxuri.desktop.clean as clean
+        from nyxuri.ux import prompt_confirm
 
         class NoFileno:
             def isatty(self):
@@ -93,11 +84,10 @@ class TestCleanHelpers(unittest.TestCase):
             def fileno(self):
                 raise io.UnsupportedOperation("redirected stdin is pseudofile")
 
-        tasks = [{"key": "cache", "label": "l", "target": "t", "size": 1}]
-        with patch.object(sys, "stdin", NoFileno()):
-            # The tui CheckboxList owns key reading now; a non-tty stdin
-            # yields no selection instead of a crash.
-            self.assertIsNone(clean._checkbox(tasks))
+        with patch.object(sys, "stdin", NoFileno()), \
+             contextlib.redirect_stdout(io.StringIO()), \
+             patch.dict(os.environ, {"NYXURI_AUTO_YES": "0"}):
+            self.assertFalse(prompt_confirm("purge_prompt", "n", destructive=True))
 
 
 if __name__ == "__main__":

@@ -24,7 +24,7 @@
 | 包管理 / 供给 (`nyxuri/pkg/`, `catalog.toml`) | `manifest-schema.md`（catalog 同源）, `delayed-decisions.md` | `python3 -m unittest tests/pkg/` |
 | 状态 / 快照 (`nyxuri/state/`) | `state-ops.md` | `python3 -m unittest tests/state/` |
 | CLI 命令 / 流程编排 (`cli.py`, `nyxuri/installer/`) | `operation-map.md`, `manifest-schema.md` | `python3 -m unittest tests/test_cli.py tests/test_ai_specs.py` |
-| 终端 UI / 桌面能力 (`tui.py`, `nyxuri/desktop/`) | `tui-charter.md` | 交互冒烟，检查退出 trap |
+| 市场界面 / 桌面能力 (`nyxuri/market/`, `ux.py`, `nyxuri/desktop/`) | `tui-charter.md` | `python3 -m unittest tests/market/ tests/test_ux.py` + kitty 实机冒烟 |
 | 预设机制 (`deploy/preset.py` + `desktop/presets.py`) | `preset-mechanism.md` | `python3 -m unittest tests/deploy/test_preset.py` |
 | 双语文案 / 提示信息 (`translations.toml`, `core.py`) | `i18n.md`, `writing-voice.md` | `python3 -m unittest tests/test_i18n.py` |
 | 文档体系 (`llms-wiki/`, `notes/`, `ROADMAP*`) | `docs-charter.md` | `python3 -m unittest tests/test_ai_specs.py` |
@@ -38,7 +38,7 @@
 
 1. **物理隔离**：仓库源码与 `~/.config/` 物理隔离，只能走 `nyxuri.deploy.atomic` 的 `atomic_replace_item` 机制原子复制，严禁 `ln -s` 软链接进 `~/.config/`。
 2. **Dunder 保留协议**：文件或目录名含 `__custom__`（如 `__custom__.kdl`）在更新/预设切换时必须保留；`monitor.kdl` 等按名引用走 manifest `preserve`。
-3. **纯标库与无未声明依赖**：`nyxuri/` 引擎坚守 Python 纯标准库（零 pip 依赖，需 3.11+ 因 `tomllib`）。
+3. **引擎零依赖，TUI 单点声明**：`nyxuri/` 引擎核心坚守 Python 纯标准库（零 pip 依赖，需 3.11+ 因 `tomllib`）；唯一例外是 `nyxuri/market/` 交互层声明 `python-textual`（PKGBUILD optdepends）——缺席时全部 CLI 动词照常可用，交互入口只提示安装。
 4. **权限防御**：`install.sh` / `nyxuri` 严禁以 root 权限运行（`id -u == 0` 直接拒绝，系统级维护除外）。
 5. **模板占位符**：`units/` 模板里的 `/home/user` 必须由部署引擎替换为目标 `$HOME`，禁止硬编码。
 6. **硬件中立**：默认配置不指定特定 GPU 驱动变量，部署不按 PCI 设备改写驱动（历史案卷见 `llms-wiki/archive/nvidia-patch.md`）。

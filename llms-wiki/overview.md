@@ -1,19 +1,20 @@
 # Overview — 一页仓库地图
 
 > Nyxuri 是精选桌面配置的原子部署引擎，正在收敛为「桌面插件市场」：
-> 单元（units/）× 内核（kernel/）× 市场界面（4 动词 + TUI 工坊）。
+> 单元（units/）× 内核（kernel/）× 市场界面（Textual App + 4 动词）。
 > 本页是文件树与分层的一页地图；单元模型契约见 [unit-model](unit-model.md)。
 
 ## 精神
 
 三条原则（详见 [vision](vision.md)）：**秩序**（每层职责明确）、**做减法**
-（一个机制能覆盖两处就用一个）、**无熵**（零 pip 依赖，纯标库，3.11+ 因 tomllib）。
+（一个机制能覆盖两处就用一个）、**无熵**（引擎零 pip 依赖，纯标库，3.11+ 因 tomllib；
+交互层唯一声明 `python-textual`，缺席时 CLI 照常）。
 
 ## 仓库地图（KM3.5 终态，文件树即架构）
 
 ```
 Nyxuri/
-├─ nyxuri/            引擎 · 11 项
+├─ nyxuri/            引擎 · 12 项
 │   ├─ kernel/        registry（蓝图唯一读者）· resolver（纯依赖计算）·
 │   │                 ledger（state.json 唯一写者）· transaction（唯一副作用编排）
 │   ├─ deploy/        atomic（原子置换+Dunder）· manifest · templates ·
@@ -22,13 +23,15 @@ Nyxuri/
 │   │                 fzf · detection · catalog（根 catalog.toml 解析）
 │   ├─ state/         backup（30 滚动快照）· uninstall（勾选式清理）
 │   ├─ desktop/       theme（深浅轴）· shell_switcher · clean · presets（流程半，渲染归 UI）
-│   ├─ installer/     workflows + menus（交互式主菜单与整装/更新编排，作者裁决保留为常驻产品面）
-│   └─ cli.py · core.py（环境+锁+日志+i18n 地基）· sysdoctor.py（系统体检）·
-│       tui.py · translations.toml（双语文案）
+│   ├─ installer/     workflows（整装/更新编排：过渡期领域动词的引擎半）
+│   ├─ market/        唯一 Textual 层：app（终端交接/阶段）· data（账本投影）·
+│   │                 actions · gate（缺席守卫）· modals · screens/（无参 nyxuri 落点）
+│   └─ cli.py · core.py（环境+锁+日志+i18n 地基）· ux.py（零依赖终端基座）·
+│       sysdoctor.py（系统体检）· translations.toml（双语文案）
 ├─ units/             蓝图 · 13 目录 = 12 真单元 + wallpapers（KM4 + theme 共享模板池；wallpapers/theme 为 merge 共享生活区）
 ├─ shell/             自研 Quickshell 桌面（契约见 shell/AGENTS.md；`shell/units/` 为
 │                     shell 命名空间蓝图，12 个 runtime 单元，KM4）
-├─ tests/             镜像源码树：kernel/ deploy/ pkg/ state/ desktop/ installer/
+├─ tests/             镜像源码树：kernel/ deploy/ pkg/ state/ desktop/ installer/ market/
 │                     tools/{orbit,wallpaper_picker,translate}/ shell/ + 契约测试置顶
 ├─ packaging/         AUR PKGBUILD + gen-deps.py（单包全量：引擎+单元+Shell；
 │                     depends=引擎运行时，optdepends 自动汇聚）+ .install 提示
@@ -39,7 +42,7 @@ Nyxuri/
 
 每个目录一行「为什么在这」：kernel 是不可开关的底座；deploy 只管文件机械；
 pkg 管包与供给；state 管账本外的状态副本；desktop 管活桌面副作用；installer 是
-交互菜单与整装编排（作者裁决常驻）；packaging 是开发者工具不进运行时；catalog.toml 只喂 `deps apps` 菜单（T1 起与 PKGBUILD 脱钩）。
+整装/更新编排；market 是唯一 Textual 交互层，ux 是它与 CLI 共用的零依赖终端基座；packaging 是开发者工具不进运行时；catalog.toml 只喂 `deps apps` 菜单（T1 起与 PKGBUILD 脱钩）。
 
 ## 三个概念（用户面）
 

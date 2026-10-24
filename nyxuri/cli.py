@@ -42,8 +42,7 @@ from nyxuri.state import (
 from nyxuri.core import msg
 from nyxuri.desktop import bridge
 from nyxuri.pkg.net import safe_git_checkout_ref, safe_git_pull
-from nyxuri.tui import press_any_key, prompt_confirm, select_language
-from nyxuri.installer.menus import deps_menu_loop, main_menu_loop
+from nyxuri.ux import press_any_key, prompt_confirm
 from nyxuri.installer.workflows import (
     check_new_deps_post_update,
     install_configs_workflow,
@@ -81,7 +80,7 @@ def _package_installer(unit_id: str, missing: List[str]) -> bool:
 
 def _report_steps(steps) -> int:
     """Turn transaction Steps into bilingual prose; 0 only if every unit won."""
-    from nyxuri.tui import format_steps
+    from nyxuri.ux import format_steps
 
     lines = format_steps(steps)
     for line in lines:
@@ -309,12 +308,15 @@ def _cmd_deps(sub_args: List[str]) -> int:
     sub = sub_args[0].lower() if sub_args else ""
     if len(sub_args) > 1 or sub not in ("", "core", "apps", "opt", "optional"):
         exit_usage(f"{CLI_CMD} deps [core|apps]")
+    if not sub:
+        # T2: the interactive chooser lives in the market App; the CLI is
+        # parameterized only.
+        print(msg("usage_deps_sub"))
+        return 2
     if sub == "core":
         ok = run_dep_menu_loop()
-    elif sub in ("apps", "opt", "optional"):
-        ok = run_optional_apps_menu_loop()
     else:
-        ok = deps_menu_loop()
+        ok = run_optional_apps_menu_loop()
     return 0 if ok else 1
 
 
@@ -555,8 +557,8 @@ def main() -> None:
     init_logger()
     get_env()
     # The event delivery is the outer layer's job (unit-model.md §6): wire
-    # the Shell bridge once so every verb (CLI, TUI, installer menus) that
-    # lands a unit transaction notifies the running shell over its own IPC.
+    # the Shell bridge once so every surface (CLI, market App) that lands a
+    # unit transaction notifies the running shell over its own IPC.
     bridge.wire()
     ensure_nyxuri_symlink()
 
@@ -589,11 +591,12 @@ def main() -> None:
         if not pending_from_menu:
             sys.exit(0 if deploy_ok else 1)
 
-    # Interactive flow
+    # Interactive flow — the market App is the one interactive entry (T2).
     if not sys.stdin.isatty():
         sys.exit(0 if install_configs_workflow("full") else 1)
-    select_language()
-    main_menu_loop()
+    from nyxuri.market import run as run_market
+
+    sys.exit(run_market())
 
 
 if __name__ == "__main__":

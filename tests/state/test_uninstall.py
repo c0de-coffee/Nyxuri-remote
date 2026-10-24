@@ -138,10 +138,8 @@ class TestUninstallArchiveGlob(unittest.TestCase):
         (self.env.config_dir / "niri").mkdir(parents=True, exist_ok=True)
         (self.env.config_dir / "niri" / "config.kdl").write_text("current")
 
-        with patch("sys.stdin.isatty", return_value=True), patch("builtins.print"), \
-             patch("nyxuri.state.uninstall.CheckboxList") as checklist:
-            checklist.return_value.run.return_value = ["configs", "archives"]
-            uninstall_nyxuri("")
+        with patch("sys.stdin.isatty", return_value=True), patch("builtins.print"):
+            uninstall_nyxuri("", selected={"configs", "archives"})
 
         # Old archive cleaned (gap #1), but the freshly-created config archive survives.
         self.assertFalse(old.exists(), "Pre-existing archive must be cleaned")

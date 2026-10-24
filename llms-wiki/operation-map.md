@@ -1,10 +1,29 @@
 # Operation Map — 全部 CLI 命令
 
-> 命令分发在 `nyxuri/cli.py` 的 `COMMANDS` dict。退出码自动传播。
+> 命令分发在 `nyxuri/cli.py` 的 `COMMANDS` dict。退出码自动传播。无参 = 市场
+> App（唯一交互界面）。
 > KM3.5 起 `COMMANDS` 收敛为 20 键 = 17 活动词 + enable/disable 长动词 + help；
 > 旧命令别名 ×12 与倒计时表已处决——旧名就是普通 unknown command。
 > KM5：`install.sh` 退役为一次性引导（无参数透传，常驻入口 = `nyxuri/launcher.sh`）；
 > `migrations/` 与 nyxniri 兼容层（别名 / `NYXNIRI_*`）处决。
+
+## 无参入口（唯一交互界面）
+
+不带参数运行 `nyxuri` 进 Textual 市场 App（`nyxuri/market/`）：工坊、预设、组件
+清单、核心依赖、可选软件、快照、更新、清理、卸载、诊断各自一屏。屏幕只读账本
+投影；pacman、部署管线、diff pager、`$EDITOR` 一律 `app.suspend()` 交接终端。
+未装 `python-textual` 时入口提示 `pacman -S python-textual`（pacman 在就问要不要代装）。
+
+CLI 子命令保持参数化行式形态，不跳进 App。少了参数时降级为：
+
+| 命令 | 无参行为 |
+|---|---|
+| `install` | 默认组件集 → 披露清单 → `y/N` 确认（等价 `install full` 的降级形态） |
+| `uninstall` | 标准默认范围（归档配置 + CLI + 已启用单元）→ 破坏性确认 |
+| `deps` | 只打印用法提示，退出码 2；`deps apps` 是唯一行式编号多选 |
+| `snapshot delete` / `rollback` | 打印快照列表 + 用法提示，不动数据 |
+| `clean` | 默认任务集 → 确认（TRIM 与 NVIDIA 着色器缓存不在默认集） |
+| `update` | 行式「部署更新？y/N」；diff 归 App |
 
 ## 单元动词（4 动词接管）
 
@@ -27,7 +46,7 @@
 | `preset <app> [list\|apply <name>\|save <name>\|edit <name>\|delete <name>\|parts\|part <slot> <name>]` | 切/管理预设与零件插槽（状态接入 `state.json` 账本） |
 | `theme [toggle\|dark\|light\|sync\|status]` | 原生切换/同步深浅主题（纯 Python 调度 gsettings、GTK settings.ini、Noctalia IPC 与 Kitty 信号） |
 | `shell [get\|set <noctalia\|nyxuri-shell> [bin_path]\|switch [\|bin_path]\|status]` | 查看或切换桌面外壳运行插槽。**[EXPERIMENTAL]** nyxuri-shell 开发中，输出带实验性警告 |
-| `deps [core\|apps]` | 装软件包：core = 核心依赖勾选单，apps = catalog.toml + 可选单元同源菜单 |
+| `deps [core\|apps]` | 装软件包：core = 核心依赖清单 + 确认，apps = catalog.toml + 可选单元的行式编号多选（App 里是同一份数据的屏幕） |
 | `pkg <install\|upgrade\|remove\|search\|info\|installed>` | 包管理直通（Fish 与安装器共用）；搜索支持 `aur` / `pac` 前缀 |
 | `clean [-n] [--only <任务>]` | 缓存清理；`-n` 只预览，Fish 的 `clean` 指向此入口 |
 | `snapshot [note\|list\|delete [index]]` | 存档当前配置 / 列出 / 删除快照 |
@@ -37,7 +56,7 @@
 | `test` | 开发者沙箱部署测试（`HOME=$(mktemp -d) python3 -m nyxuri test` 的落点；install.sh 已不透传参数） |
 | `help` | 用法 |
 
-`update` 的重启（命令行与控制面板两条路径都算）一律 `os.execve` 回常驻启动器
+`update` 的重启（命令行与市场 App 两条路径都算）一律 `os.execve` 回常驻启动器
 `nyxuri/launcher.sh`（`core.exec_cli`）——repo / standalone 模式下只有 launcher 会把
 引擎塞进 `sys.path`，自己拼 `python -m nyxuri` 离开仓库根目录就必炸（#138）。
 

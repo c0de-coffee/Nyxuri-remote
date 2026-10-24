@@ -125,97 +125,32 @@ class TestMangoAdaptation(unittest.TestCase):
         with patch.dict(os.environ, {"XDG_CURRENT_DESKTOP": "niri"}):
             self.assertEqual(detect_preferred_wm(), "niri")
 
-    def test_checkbox_list_radio_group_mutual_exclusion(self):
-        """CheckboxList with radio_group enforces single selection."""
-        from io import StringIO
-        from nyxuri.tui import CheckboxEntry, CheckboxList
-
-        entries = [
-            CheckboxEntry(key="wm_niri", label="Niri", checked=True, radio_group="wm"),
-            CheckboxEntry(key="wm_mango", label="Mango", checked=True, radio_group="wm"),
-            CheckboxEntry(key="app_waybar", label="Waybar", checked=True),
-        ]
-        chk = CheckboxList("title", entries)
-
-        # In non-interactive mode with accept_defaults, at most one per radio_group is kept
-        with patch("sys.stdin.isatty", return_value=False):
-            res = chk.run(accept_defaults=True)
-        self.assertIsNotNone(res)
-        wm_selected = [k for k in res if k.startswith("wm_")]
-        self.assertEqual(len(wm_selected), 1)
-        self.assertEqual(wm_selected[0], "wm_niri")
-        self.assertIn("app_waybar", res)
-
-        # In interactive mode: pressing SPACE on mango deselects niri and selects mango
-        entries2 = [
-            CheckboxEntry(key="wm_niri", label="Niri", checked=True, radio_group="wm"),
-            CheckboxEntry(key="wm_mango", label="Mango", checked=False, radio_group="wm"),
-            CheckboxEntry(key="app_waybar", label="Waybar", checked=False),
-        ]
-        chk2 = CheckboxList("title", entries2)
-        # DOWN (moves focus to mango) -> SPACE (toggles mango on, niri off) -> ENTER
-        with patch("sys.stdin.isatty", return_value=True), \
-             patch("nyxuri.tui.read_key", side_effect=["DOWN", "SPACE", "ENTER"]), \
-             patch("sys.stdout", new_callable=StringIO):
-            res2 = chk2.run()
-
-        self.assertEqual(res2, ["wm_mango"])
-
-        # Pressing SPACE again on already-selected mango keeps it selected (cannot untick radio)
-        chk3 = CheckboxList("title", [
-            CheckboxEntry(key="wm_niri", label="Niri", checked=False, radio_group="wm"),
-            CheckboxEntry(key="wm_mango", label="Mango", checked=True, radio_group="wm"),
-        ])
-        with patch("sys.stdin.isatty", return_value=True), \
-             patch("nyxuri.tui.read_key", side_effect=["DOWN", "SPACE", "ENTER"]), \
-             patch("sys.stdout", new_callable=StringIO):
-            res3 = chk3.run()
-        self.assertEqual(res3, ["wm_mango"])
-
-        # Pressing 'n' deselects normal apps but keeps the active radio selection
-        chk4 = CheckboxList("title", [
-            CheckboxEntry(key="wm_niri", label="Niri", checked=True, radio_group="wm"),
-            CheckboxEntry(key="wm_mango", label="Mango", checked=False, radio_group="wm"),
-            CheckboxEntry(key="app_waybar", label="Waybar", checked=True),
-        ])
-        with patch("sys.stdin.isatty", return_value=True), \
-             patch("nyxuri.tui.read_key", side_effect=["n", "ENTER"]), \
-             patch("sys.stdout", new_callable=StringIO):
-            res4 = chk4.run()
-        self.assertEqual(res4, ["wm_niri"])
-
-    def test_run_master_component_menu_uses_radio_for_wms(self):
-        """Master component menu creates radio entries for all supported WMs."""
-        from nyxuri.installer.menus import run_master_component_menu
-        from nyxuri.tui import CheckboxList
+    def test_component_options_selects_exactly_one_wm(self):
+        """WM radio contract (T2): every WM offered, preferred one selected."""
         import os
+        from nyxuri.market.data import MarketData
+        from tests.utils import TempEnv
 
-        captured_entries = []
+        with TempEnv() as ctx:
+            src = ctx.home / "configs-src"
+            for unit in ("niri", "mango", "kitty"):
+                (src / unit).mkdir(parents=True)
+                (src / unit / "manifest.toml").write_text("", encoding="utf-8")
+                (src / unit / "config.conf").write_text("", encoding="utf-8")
+            ctx.env.units_src = src
+            import nyxuri.deploy.deploy as _deploy
+            import nyxuri.deploy.manifest as _manifest
+            _deploy._CONFIG_ITEMS_CACHE = []
+            _manifest._MANIFEST_CACHE = None
 
-        def fake_chk_run(self, accept_defaults=False):
-            captured_entries.extend(self.entries)
-            # return default checked items
-            return [e.key for e in self.entries if not e.is_separator and e.checked]
+            with patch.dict(os.environ, {"XDG_CURRENT_DESKTOP": "mango"}), \
+                 patch("nyxuri.pkg.deps.is_dep_installed", return_value=False):
+                options = MarketData().component_options("full")
 
-        with patch.object(CheckboxList, "run", fake_chk_run), \
-             patch.dict(os.environ, {"XDG_CURRENT_DESKTOP": "mango"}):
-            res = run_master_component_menu()
-
-        self.assertIsNotNone(res)
-        wm_entries = [e for e in captured_entries if e.key in ("config_niri", "config_mango")]
-        self.assertEqual(len(wm_entries), 2)
-        for e in wm_entries:
-            self.assertEqual(e.radio_group, "wm")
-
-        # Because XDG_CURRENT_DESKTOP=mango, config_mango should be checked and config_niri unchecked
-        mango_entry = next(e for e in wm_entries if e.key == "config_mango")
-        niri_entry = next(e for e in wm_entries if e.key == "config_niri")
-        self.assertTrue(mango_entry.checked)
-        self.assertFalse(niri_entry.checked)
-
-        # In returned configs dict, only mango should be present, not niri
-        self.assertIn("mango", res["configs"])
-        self.assertNotIn("niri", res["configs"])
+            names = [wm["name"] for wm in options["wms"]]
+            self.assertEqual(names, ["mango", "niri"])
+            selected = [wm["name"] for wm in options["wms"] if wm["selected"]]
+            self.assertEqual(selected, ["mango"], "running WM wins the radio")
 
 
 if __name__ == "__main__":

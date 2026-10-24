@@ -64,7 +64,7 @@ We are committed to long-term support for dual desktop shells (the polished **No
 - **Atomic Deployment, Presets & Zero Bloat**:
   - **Dunder Protocol**: Any file or directory containing `__custom__` (e.g. `__custom__.kdl`, `__custom__.conf`) and `monitor.kdl` is permanently preserved across updates and preset swaps.
   - **Presets**: Easily switch application flavor presets (e.g. Kitty opacity variants) or create custom private presets.
-  - **Zero Bloat & Clean State**: Pure Python standard library with zero pip dependencies; disabling a unit wipes deployed files with zero residue; 30-roll automatic snapshots with instant rollback, and `nyxuri doctor` for status audits.
+  - **Zero Bloat & Clean State**: Pure Python standard library with zero pip dependencies (the interactive panel needs only the optional `python-textual`); disabling a unit wipes deployed files with zero residue; 30-roll automatic snapshots with instant rollback, and `nyxuri doctor` for status audits.
 
 ## Install
 
