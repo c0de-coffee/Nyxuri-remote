@@ -30,35 +30,50 @@ class MarketApp(App):
 
     TITLE = "Nyxuri"
     SUB_TITLE = ""
+    theme = "ansi-dark"
 
     CSS = """
-Screen {
+Screen, App {
     layout: vertical;
+    background: ansi_default;
+}
+Header {
+    background: ansi_default;
+}
+OptionList, DataTable, Tree, Static, VerticalScroll {
+    background: ansi_default;
+}
+OptionList:focus {
+    background-tint: transparent;
 }
 #screen-body {
     height: 1fr;
+    background: ansi_default;
 }
 #hint-bar {
     dock: bottom;
     height: 1;
-    background: $boost;
+    background: ansi_default;
     color: $text-muted;
     padding: 0 1;
 }
 #home-list {
     margin: 0 1;
     border: round $primary;
+    background: ansi_default;
 }
 #workshop-units {
     width: 1fr;
     margin: 0 0 0 1;
     border: round $primary;
+    background: ansi_default;
 }
 #workshop-detail {
     width: 2fr;
     margin: 0 1 0 0;
     padding: 0 1;
     border: round $primary;
+    background: ansi_default;
 }
 #lang-buttons {
     height: auto;
@@ -71,13 +86,13 @@ Screen {
 #screen-title {
     dock: top;
     height: 1;
-    background: $boost;
+    background: ansi_default;
     color: $text;
     padding: 0 1;
 }
 ConfirmModal, InputModal, ReportModal {
     align: center middle;
-    background: $background 60%;
+    background: ansi_default;
 }
 ConfirmModal Label, InputModal Label {
     width: auto;
