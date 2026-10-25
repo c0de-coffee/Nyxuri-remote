@@ -835,8 +835,8 @@ zh = "{Colors.BOLD_GREEN}[✓] 登录界面已卸载。若需移除软件包: pa
 en = "{Colors.BOLD_GREEN}[✓] Login screen uninstalled. To remove packages: paru -R noctalia-greeter greetd{Colors.RESET}"
 
 [remote_login_missing_packages]
-zh = "{Colors.BOLD_RED}[!] 缺 remote-dm 或带远程桌面支持的 niri。它们还没有现成的包：用 niri remote-desktop 分支 packaging/ 下的 PKGBUILD（niri-remote-desktop-git、remote-dm-git）编译安装后再启用{Colors.RESET}"
-en = "{Colors.BOLD_RED}[!] Missing remote-dm or a niri with remote desktop support. There are no ready-made packages yet: build them with the PKGBUILDs in packaging/ of niri's remote-desktop branch (niri-remote-desktop-git, remote-dm-git), then enable again{Colors.RESET}"
+zh = "{Colors.BOLD_RED}[!] 缺 remote-dm 或带远程桌面支持的 niri。它们还没有进仓库或 AUR：用 https://github.com/c0de-coffee/niri remote-desktop 分支 packaging/ 下的 PKGBUILD（niri-remote-desktop-git、remote-dm-git）编译安装后再启用{Colors.RESET}"
+en = "{Colors.BOLD_RED}[!] Missing remote-dm or a niri with remote desktop support. They aren't in the repos or the AUR yet: build them with the PKGBUILDs in packaging/ of the remote-desktop branch of https://github.com/c0de-coffee/niri (niri-remote-desktop-git, remote-dm-git), then enable again{Colors.RESET}"
 
 [remote_login_cmd_failed]
 zh = "{Colors.BOLD_RED}[!] 失败: {0}{Colors.RESET}"

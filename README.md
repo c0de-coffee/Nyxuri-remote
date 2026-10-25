@@ -16,8 +16,10 @@
 >   screen, and each user gets an independent session that survives disconnects.
 >   `nyxuri on remote-login` sets it up (asks once for the RDP username and password);
 >   `nyxuri off remote-login` puts the system back the way it was.
-> - It needs a niri with remote desktop support and remote-dm. Neither is published yet; the
->   unit tells you if they're missing.
+> - It needs a niri with remote desktop support and remote-dm, both from the `remote-desktop`
+>   branch of [c0de-coffee/niri](https://github.com/c0de-coffee/niri): build the Arch packages in
+>   its [`packaging/`](https://github.com/c0de-coffee/niri/tree/remote-desktop/packaging)
+>   (`niri-remote-desktop-git`, `remote-dm-git`). The unit tells you if they're missing.
 >
 > Problems with remote login belong in this repository, not upstream.
 
