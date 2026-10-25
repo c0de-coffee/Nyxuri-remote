@@ -9,10 +9,14 @@ records the state before any change in a root-only JSON file; `off` restores exa
 - RDP credentials                  only set when grd had none; cleared
 - gnome-remote-desktop.service, remote-dm.service  enabled while on; back to how they were
 
+The Noctalia plugin (noctalia-plugin/remote_login: the settings panel) is the user's side: it's
+copied to Noctalia's plugin data dir and enabled while on, and removed on off.
+
 Every privileged step is `sudo` with an argv list, never a shell string.
 """
 import json
 import mmap
+import os
 import shutil
 import stat
 import subprocess
@@ -44,6 +48,9 @@ RDM_CONFIG_CONTENT = (
 )
 
 TRUSTED_EXEC_DIRS = (Path("/usr/bin"), Path("/usr/local/bin"))
+
+PLUGIN_ID = "nyxuri/remote_login"
+PLUGIN_SOURCE = Path(__file__).resolve().parent / "noctalia-plugin" / "remote_login"
 
 
 def run(argv, input_text=None, capture=False):
@@ -183,3 +190,48 @@ def undo(state):
     if ok:
         ok = remove_root_file(STATE)
     return ok
+
+
+def plugin_dir():
+    """Noctalia's local plugin dir for ours ($XDG_DATA_HOME/noctalia/plugins/remote_login)."""
+    data = os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local" / "share")
+    return Path(data) / "noctalia" / "plugins" / PLUGIN_SOURCE.name
+
+
+def install_plugin():
+    """Copy the plugin in and enable it. Returns (installed, enabled); not installed when
+    Noctalia isn't."""
+    if not shutil.which("noctalia"):
+        return False, False
+    dest = plugin_dir()
+    try:
+        wanted = set()
+        for source in sorted(PLUGIN_SOURCE.rglob("*")):
+            if source.is_dir() or "__pycache__" in source.parts:
+                continue
+            rel = source.relative_to(PLUGIN_SOURCE)
+            wanted.add(rel)
+            target = dest / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            content = source.read_bytes()
+            # In place, not replaced: Noctalia watches the files and reloads the plugin
+            # on changes, which a new inode would escape.
+            if not target.is_file() or target.read_bytes() != content:
+                target.write_bytes(content)
+        for stale in sorted(dest.rglob("*"), reverse=True):
+            rel = stale.relative_to(dest)
+            if stale.is_file() and rel not in wanted:
+                stale.unlink()
+            elif stale.is_dir() and not any(stale.iterdir()):
+                stale.rmdir()
+    except OSError:
+        return False, False
+    # Needs a running Noctalia; otherwise Settings -> Plugins does it.
+    enabled, _ = run(["noctalia", "msg", "plugins", "enable", PLUGIN_ID], capture=True)
+    return True, enabled
+
+
+def remove_plugin():
+    if shutil.which("noctalia"):
+        run(["noctalia", "msg", "plugins", "disable", PLUGIN_ID], capture=True)
+    shutil.rmtree(plugin_dir(), ignore_errors=True)

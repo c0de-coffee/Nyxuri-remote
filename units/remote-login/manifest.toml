@@ -1,7 +1,8 @@
 # Remote Login — log in to this machine over RDP into your own headless niri session, like
 # GNOME's remote login: gnome-remote-desktop (system mode) + remote-dm (display manager for
 # remote logins) + Noctalia Greeter as the login screen. /etc, /var/lib, root and systemd side
-# effects are all declared here and undone by `off`.
+# effects are all declared here and undone by `off`. With Noctalia installed, a settings panel
+# plugin (hooks/noctalia-plugin/) goes to ~/.local/share/noctalia/plugins/remote_login while on.
 #
 # remote-dm and a niri with remote desktop support have no repo/AUR packages yet: the activate
 # hook checks for them and names the PKGBUILDs (packaging/ of the remote-desktop branch of

@@ -1,0 +1,37 @@
+{
+  "title": "Remote Login",
+  "subtitle": "Others can log in over RDP and get their own session",
+  "loading": "Checking…",
+  "refresh": "Check again",
+  "waiting": "Waiting for authorization…",
+  "copy": "Copy",
+  "copied": "Copied",
+  "setup": {
+    "text": "Remote login isn't set up on this computer yet. Nyxuri sets it up in a terminal: it installs the pieces, asks for an administrator password and for the RDP sign-in.",
+    "button": "Set up in a terminal",
+    "started": "Follow the terminal, then check again."
+  },
+  "connect": {
+    "title": "How to connect",
+    "address": "Address",
+    "fingerprint": "Fingerprint",
+    "fingerprint_hint": "RDP clients show this certificate fingerprint the first time they connect; check that it matches."
+  },
+  "signin": {
+    "title": "RDP sign-in",
+    "hint": "Clients enter these first, then log in to their own account on the login screen.",
+    "username": "Username",
+    "password_unchanged": "New password (empty keeps the current one)",
+    "reveal": "Show password",
+    "load": "Show current",
+    "save": "Save",
+    "saved": "Saved"
+  },
+  "error": {
+    "denied": "Not authorized (the password prompt was cancelled or failed).",
+    "timeout": "No answer in time; try again.",
+    "failed": "That didn't work; see the Noctalia log.",
+    "username_required": "Enter a username."
+  },
+  "agent_off": "Changes need Noctalia's polkit agent, which is off: turn on Settings → Security → Polkit Agent."
+}

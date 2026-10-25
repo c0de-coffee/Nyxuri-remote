@@ -181,6 +181,10 @@ def main():
                 print(msg("remote_login_rollback_failed"))
         return 1
 
+    installed, enabled = common.install_plugin()
+    if installed:
+        print(msg("remote_login_plugin_enabled" if enabled else "remote_login_plugin_hint"))
+
     status = common.grd_status() or {}
     print(msg("remote_login_ready", status.get("Port", "3389")))
     return 0

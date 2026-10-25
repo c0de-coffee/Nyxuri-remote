@@ -6,6 +6,7 @@ settings, and records each argv for shape assertions.
 """
 
 import importlib.util
+import os
 import sys
 import unittest
 from importlib.machinery import SourceFileLoader
@@ -43,6 +44,7 @@ class FakeMachine:
         self.calls = []
         self.inputs = []
         self.fail = set()  # argv tuples (or prefixes) that fail
+        self.noctalia_running = True
 
     def _result(self, ok=True, stdout=""):
         return SimpleNamespace(returncode=0 if ok else 1, stdout=stdout, stderr="")
@@ -110,6 +112,8 @@ class FakeMachine:
             elif sub[:2] == ["rdp", "disable"]:
                 self.enabled.discard("gnome-remote-desktop.service")
             return self._result()
+        if argv[:3] == ["noctalia", "msg", "plugins"]:
+            return self._result(self.noctalia_running)
         if cmd[:1] == ["openssl"]:
             Path(cmd[cmd.index("-keyout") + 1]).write_text("key", encoding="utf-8")
             Path(cmd[cmd.index("-out") + 1]).write_text("cert", encoding="utf-8")
@@ -151,6 +155,9 @@ class RemoteLoginHookTest(unittest.TestCase):
             patch.object(self.common, "trusted_executable", return_value="/usr/bin/x"),
             patch.object(self.common, "niri_has_remote_desktop", return_value=True),
             patch.object(self.activate.sys.stdin, "isatty", return_value=False),
+            patch.dict(os.environ, {"XDG_DATA_HOME": str(self._ctx.env.home / "data")}),
+            # No Noctalia unless a test says so.
+            patch.object(self.common.shutil, "which", return_value=None),
             patch("builtins.print"),
         ]
         for p in self._patches:
@@ -309,6 +316,59 @@ class TestDeactivate(RemoteLoginHookTest):
         self.assertEqual(self.deactivate.main(), 1)
 
         self.assertTrue(self.state.exists())
+
+
+class TestNoctaliaPlugin(RemoteLoginHookTest):
+    PLUGIN = ["noctalia", "msg", "plugins"]
+
+    def setUp(self):
+        super().setUp()
+        self.dest = self._ctx.env.home / "data" / "noctalia" / "plugins" / "remote_login"
+        self.source = HOOKS / "noctalia-plugin" / "remote_login"
+
+    def _with_noctalia(self):
+        return patch.object(self.common.shutil, "which",
+                            side_effect=lambda name: "/usr/bin/noctalia" if name == "noctalia" else None)
+
+    def test_on_copies_and_enables_the_plugin(self):
+        with self._with_noctalia():
+            self.assertEqual(self.activate.main(), 0)
+
+        for name in ("plugin.toml", "panel.luau", "shortcut.luau", "grd.luau", "translations/en.json"):
+            self.assertEqual((self.dest / name).read_bytes(), (self.source / name).read_bytes(), name)
+        self.assertIn(self.PLUGIN + ["enable", "nyxuri/remote_login"], self.machine.calls)
+
+    def test_update_rewrites_in_place_and_drops_stale_files(self):
+        with self._with_noctalia():
+            self.assertEqual(self.activate.main(), 0)
+            panel = self.dest / "panel.luau"
+            inode = panel.stat().st_ino
+            panel.write_text("old", encoding="utf-8")
+            (self.dest / "gone.luau").write_text("x", encoding="utf-8")
+
+            self.assertEqual(self.activate.main(), 0)
+
+        self.assertEqual(panel.read_bytes(), (self.source / "panel.luau").read_bytes())
+        self.assertEqual(panel.stat().st_ino, inode)  # Noctalia's file watch keeps working
+        self.assertFalse((self.dest / "gone.luau").exists())
+
+    def test_noctalia_not_running_still_installs(self):
+        self.machine.noctalia_running = False
+        with self._with_noctalia():
+            self.assertEqual(self.activate.main(), 0)
+        self.assertTrue((self.dest / "plugin.toml").is_file())
+
+    def test_without_noctalia_nothing_is_installed(self):
+        self.assertEqual(self.activate.main(), 0)
+        self.assertFalse(self.dest.exists())
+        self.assertFalse(any(call[:1] == ["noctalia"] for call in self.machine.calls))
+
+    def test_off_disables_and_removes_the_plugin(self):
+        with self._with_noctalia():
+            self.assertEqual(self.activate.main(), 0)
+            self.assertEqual(self.deactivate.main(), 0)
+        self.assertFalse(self.dest.exists())
+        self.assertIn(self.PLUGIN + ["disable", "nyxuri/remote_login"], self.machine.calls)
 
 
 class TestPackaging(unittest.TestCase):

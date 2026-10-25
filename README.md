@@ -16,6 +16,11 @@
 >   screen, and each user gets an independent session that survives disconnects.
 >   `nyxuri on remote-login` sets it up (asks once for the RDP username and password);
 >   `nyxuri off remote-login` puts the system back the way it was.
+> - **Remote Login panel for Noctalia**, like GNOME Settings' page: turn RDP on or off, the address
+>   and certificate fingerprint to connect with, and the RDP username and password. Changes go
+>   through gnome-remote-desktop's configuration service, so Noctalia's polkit agent asks for an
+>   administrator password. Open it from the control center shortcut or with
+>   `noctalia msg panel-toggle nyxuri/remote_login:panel`.
 > - It needs a niri with remote desktop support and remote-dm, both from the `remote-desktop`
 >   branch of [c0de-coffee/niri](https://github.com/c0de-coffee/niri): build the Arch packages in
 >   its [`packaging/`](https://github.com/c0de-coffee/niri/tree/remote-desktop/packaging)

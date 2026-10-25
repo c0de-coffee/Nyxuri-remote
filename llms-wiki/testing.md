@@ -42,7 +42,7 @@ argv[0]（shebang 直启下是解释器名，不是脚本名），验证恒假�
 | 线性迁移与品牌重命名 | 历史 `NyxNiri` 小写迁移、静态 Tombstone 孤儿清理、软链接自愈 | `tests/deploy/test_migrations.py` |
 | Fcitx5 与输入法生态 | 雾凇方案挂载与预编译、皮肤解耦激活、深浅切换无损跟随、对等卸载 | `tests/desktop/test_fcitx.py` |
 | 登录器模块 | Noctalia Greeter 安装、状态侦测、Polkit 规则、对等卸载 | `tests/desktop/test_greeter.py` |
-| 远程登录单元 | 首次记录 / 重放幂等、凭据走 stdin、GDM 冲突、失败回滚、off 按记录还原 | `tests/desktop/test_remote_login.py` |
+| 远程登录单元 | 首次记录 / 重放幂等、凭据走 stdin、GDM 冲突、失败回滚、off 按记录还原、Noctalia 面板插件的安装（原地更新）/ 启用 / 撤除 | `tests/desktop/test_remote_login.py` |
 | 主题同步中枢 | `nyxuri.desktop.theme` 动态同步 GTK3/4 与 Qt、原子写 INI | `tests/desktop/test_theme_sync.py` |
 | 合成器与网关脚本 | `session-shell.sh`、`shell-action.sh` 9 大动作分发契约与回退行为 | `tests/desktop/test_config_scripts.py` |
 | 原子部署与保留 | 文件/目录原子 swap、中断保护栈、`__custom__` 与 preserve 保留 | `tests/deploy/test_deploy.py`, `tests/deploy/test_manifest.py` |

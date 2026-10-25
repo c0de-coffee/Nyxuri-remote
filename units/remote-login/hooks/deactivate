@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """remote-login off-hook: undo everything the on-hook did (see remote_login_common.undo).
 
-Unit-owned behavior (KM3), run by the transaction from `nyxuri off remote-login`. Ends the
-remote sessions (stopping remote-dm), restores remote-dm's and grd's configuration and services
-as recorded before the first activation, and removes what was created for this unit.
+Unit-owned behavior (KM3), run by the transaction from `nyxuri off remote-login`. Removes the
+Noctalia settings panel plugin, ends the remote sessions (stopping remote-dm), restores
+remote-dm's and grd's configuration and services as recorded before the first activation, and
+removes what was created for this unit.
 Packages stay installed (asymmetric off, unit-model §7.1).
 """
 import sys
@@ -23,6 +24,7 @@ def main():
     if not ok:
         print(msg("remote_login_state_invalid", str(common.STATE)))
         return 1
+    common.remove_plugin()
     if state is None:
         print(msg("remote_login_nothing_to_undo"))
         return 0

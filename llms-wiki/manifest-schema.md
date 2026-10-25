@@ -163,7 +163,7 @@ packages_aur = ["noctalia-greeter"]
 label = "Remote Login (RDP)"
 category = "system"
 detect = "remote-dm"
-post_install = "activate"       # → 首次记录改动前状态（/etc/remote-dm/nyxuri-state.json），问 RDP 凭据；重放幂等
+post_install = "activate"       # → 首次记录改动前状态（/etc/remote-dm/nyxuri-state.json），问 RDP 凭据；重放幂等；装 Noctalia 面板插件（hooks/noctalia-plugin/）
 post_remove = "deactivate"      # → 按记录逐项还原，只撤自己创建的证书 / 凭据
 
 [privilege]

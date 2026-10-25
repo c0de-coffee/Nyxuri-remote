@@ -890,6 +890,14 @@ en = "{Colors.BOLD_RED}[!] Some changes could not be undone; the state record st
 zh = "{Colors.BOLD_GREEN}[✓] 远程登录已开启：用 RDP 客户端连这台机器的 {0} 端口{Colors.RESET}"
 en = "{Colors.BOLD_GREEN}[✓] Remote login is on: connect with an RDP client to port {0} of this machine{Colors.RESET}"
 
+[remote_login_plugin_enabled]
+zh = "{Colors.BOLD_GREEN}[✓] Noctalia 设置面板已启用：控制中心里加一个“远程登录”快捷入口，或运行 noctalia msg panel-toggle nyxuri/remote_login:panel{Colors.RESET}"
+en = "{Colors.BOLD_GREEN}[✓] Noctalia settings panel enabled: add the Remote Login shortcut to the control center, or run noctalia msg panel-toggle nyxuri/remote_login:panel{Colors.RESET}"
+
+[remote_login_plugin_hint]
+zh = "{Colors.BOLD_YELLOW}[!] Noctalia 设置面板已安装，但 Noctalia 没在运行，没能启用：之后在 Noctalia 设置 → 插件 里打开 Remote Login{Colors.RESET}"
+en = "{Colors.BOLD_YELLOW}[!] Noctalia settings panel installed, but Noctalia isn't running to enable it: turn on Remote Login later in Noctalia Settings → Plugins{Colors.RESET}"
+
 [remote_login_nothing_to_undo]
 zh = "{Colors.DARK_GRAY}没有远程登录的改动记录，无需撤回{Colors.RESET}"
 en = "{Colors.DARK_GRAY}No remote login changes recorded; nothing to undo{Colors.RESET}"

@@ -14,6 +14,9 @@
 >   gnome-remote-desktop（系统模式）接收连接，remote-dm（只管远程登录的显示管理器）用 Noctalia Greeter
 >   作登录界面，每个用户有自己的会话，断线重连回到原来的桌面。`nyxuri on remote-login` 负责配置
 >   （只在第一次问 RDP 用户名和密码），`nyxuri off remote-login` 把系统还原成原样。
+> - **Noctalia 的远程登录面板**，和 GNOME 设置里的那页一样：开关 RDP、查看连接地址和证书指纹、修改 RDP
+>   用户名和密码。修改经过 gnome-remote-desktop 的配置服务，由 Noctalia 的 polkit 代理弹出管理员密码框。
+>   从控制中心的快捷入口打开，或运行 `noctalia msg panel-toggle nyxuri/remote_login:panel`。
 > - 它需要带远程桌面支持的 niri 和 remote-dm，两者都在 [c0de-coffee/niri](https://github.com/c0de-coffee/niri)
 >   的 `remote-desktop` 分支：用它 [`packaging/`](https://github.com/c0de-coffee/niri/tree/remote-desktop/packaging)
 >   下的 PKGBUILD 编译安装（`niri-remote-desktop-git`、`remote-dm-git`）。缺了的话单元会提示。

@@ -1,0 +1,33 @@
+# Remote login settings for the machine's gnome-remote-desktop system daemon, like GNOME
+# Settings' Remote Login page. Shipped and enabled by Nyxuri's remote-login unit, which sets up
+# the rest (remote-dm, grd's system mode, the login screen).
+#
+# Changes go through grd's configuration service and polkit, so Noctalia's polkit agent
+# ([shell] polkit_agent) asks for an administrator password.
+
+id = "nyxuri/remote_login"
+name = "Remote Login"
+version = "1.0.0"
+plugin_api = 26
+author = "nyxuri"
+license = "GPL-3.0-or-later"
+dependencies = ["busctl", "gnome-remote-desktop"]
+tags = ["system", "remote"]
+icon = "screen-share"
+description = "Log in to this computer over RDP: turn it on or off, see how to connect, and set the RDP sign-in."
+
+[[panel]]
+id = "panel"
+entry = "panel.luau"
+width = 480
+height = 540
+placement = "floating"
+position = "center"
+keyboard_focus = "on_demand"
+# A misclick shouldn't throw away a half-typed password.
+dismiss_on_outside_click = false
+
+# Control center tile that opens the panel.
+[[shortcut]]
+id = "shortcut"
+entry = "shortcut.luau"
