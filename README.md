@@ -22,6 +22,8 @@
 >   (`niri-remote-desktop-git`, `remote-dm-git`). The unit tells you if they're missing.
 >
 > Problems with remote login belong in this repository, not upstream.
+>
+> This work was done in collaboration with Claude (Anthropic's AI assistant, via Claude Code).
 
 <div align="center">
 

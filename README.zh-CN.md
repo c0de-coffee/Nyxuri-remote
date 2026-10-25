@@ -19,6 +19,8 @@
 >   下的 PKGBUILD 编译安装（`niri-remote-desktop-git`、`remote-dm-git`）。缺了的话单元会提示。
 >
 > 远程登录相关的问题请在这个仓库提，不要找原作者。
+>
+> 这些改动是和 Claude（Anthropic 的 AI 助手，通过 Claude Code）协作完成的。
 
 <div align="center">
 
