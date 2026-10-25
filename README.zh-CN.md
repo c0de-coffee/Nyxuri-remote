@@ -4,6 +4,20 @@
   <a href="README.md">English</a> | <strong>简体中文</strong>
 </div>
 
+> [!NOTE]
+> **这是一个 fork**，原仓库是 Echoes678 的 [ech678/Nyxuri](https://github.com/ech678/Nyxuri)，
+> 由 [c0de-coffee](https://github.com/c0de-coffee) 维护。这段说明下面是原版 README。
+>
+> 这个 fork 加了什么：
+>
+> - **`remote-login` 单元**：用 RDP 远程登录这台机器，进入自己独立的无头 niri 会话，和 GNOME 的远程登录一样。
+>   gnome-remote-desktop（系统模式）接收连接，remote-dm（只管远程登录的显示管理器）用 Noctalia Greeter
+>   作登录界面，每个用户有自己的会话，断线重连回到原来的桌面。`nyxuri on remote-login` 负责配置
+>   （只在第一次问 RDP 用户名和密码），`nyxuri off remote-login` 把系统还原成原样。
+> - 它需要带远程桌面支持的 niri 和 remote-dm，这两样还没有公开发布；缺了的话单元会提示。
+>
+> 远程登录相关的问题请在这个仓库提，不要找原作者。
+
 <div align="center">
 
 <h1>Nyxuri</h1>

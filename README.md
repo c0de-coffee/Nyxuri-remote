@@ -4,6 +4,23 @@
   <strong>English</strong> | <a href="README.zh-CN.md">简体中文</a>
 </div>
 
+> [!NOTE]
+> **This is a fork** of [ech678/Nyxuri](https://github.com/ech678/Nyxuri) by Echoes678, maintained by
+> [c0de-coffee](https://github.com/c0de-coffee). Below this note is the original README.
+>
+> What the fork adds:
+>
+> - **`remote-login` unit**: log in to the machine over RDP and land in your own headless niri
+>   session, like GNOME's remote login. gnome-remote-desktop (system mode) takes the connection,
+>   remote-dm (a display manager just for remote logins) shows Noctalia Greeter as the login
+>   screen, and each user gets an independent session that survives disconnects.
+>   `nyxuri on remote-login` sets it up (asks once for the RDP username and password);
+>   `nyxuri off remote-login` puts the system back the way it was.
+> - It needs a niri with remote desktop support and remote-dm. Neither is published yet; the
+>   unit tells you if they're missing.
+>
+> Problems with remote login belong in this repository, not upstream.
+
 <div align="center">
 
 <h1>Nyxuri</h1>
