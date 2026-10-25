@@ -4,7 +4,7 @@ Nyxuri
 ├── catalog.toml                # package catalogue (18 standalone apps without dotfiles)
 ├── nyxuri/                     # Python core engine (zero pip dependencies)
 ├── shell/                      # Nyxuri Shell (QML/Qt6 desktop shell, experimental)
-└── units/                      # 13 modular desktop capability units
+└── units/                      # 14 modular desktop capability units
     ├── fastfetch/              # system information
     ├── fcitx5-rime/            # dynamic Material You input skin & Rime config
     ├── fish/                   # shell aliases & functions
@@ -13,6 +13,7 @@ Nyxuri
     ├── mango/                  # MangoWM window manager & session scripts
     ├── niri/                   # window manager & session scripts
     ├── noctalia/               # desktop shell, theme sync, Orbit & wallpaper picker
+    ├── remote-login/           # RDP remote login into your own headless niri session
     ├── starship/               # prompt styling
     ├── theme/                  # shared matugen theme template pool
     ├── wallpapers/             # companion wallpapers & video pack hooks

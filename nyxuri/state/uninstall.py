@@ -69,7 +69,7 @@ def uninstall_nyxuri(mode: str = "") -> bool:
     # --- KM3: unit switches replace the module checkboxes. Enabled units
     # with living-area side effects are offered through `off` (cascade off),
     # which vaults customs and wipes to white paper.
-    HOOK_UNITS = ("fcitx5-rime", "fish", "greeter", "noctalia")
+    HOOK_UNITS = ("fcitx5-rime", "fish", "greeter", "noctalia", "remote-login")
     enabled_hooked = [
         uid for uid in HOOK_UNITS
         if uid in registry.unit_ids()

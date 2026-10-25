@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+"""remote-login off-hook: undo everything the on-hook did (see remote_login_common.undo).
+
+Unit-owned behavior (KM3), run by the transaction from `nyxuri off remote-login`. Ends the
+remote sessions (stopping remote-dm), restores remote-dm's and grd's configuration and services
+as recorded before the first activation, and removes what was created for this unit.
+Packages stay installed (asymmetric off, unit-model §7.1).
+"""
+import sys
+from pathlib import Path
+
+# The blueprint is read-only: no __pycache__ next to the shared module, however we're run.
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # standalone runs
+
+import remote_login_common as common  # noqa: E402
+from nyxuri.core import msg  # noqa: E402
+
+
+def main():
+    ok, state = common.read_state()
+    if not ok:
+        print(msg("remote_login_state_invalid", str(common.STATE)))
+        return 1
+    if state is None:
+        print(msg("remote_login_nothing_to_undo"))
+        return 0
+    if not common.undo(state):
+        print(msg("remote_login_rollback_failed"))
+        return 1
+    print(msg("remote_login_uninstall_done"))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

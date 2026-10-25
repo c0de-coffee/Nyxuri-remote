@@ -155,6 +155,20 @@ post_remove = "deactivate"
 [privilege]
 requires_root = true
 system_paths = ["/etc/greetd/config.toml", "/etc/polkit-1/rules.d/50-noctalia-greeter.rules", "/var/lib/noctalia-greeter"]
+
+# units/remote-login/manifest.toml — RDP 远程登录（grd 系统模式 + remote-dm），纯钩子单元
+optional = true
+packages = ["gnome-remote-desktop"]   # remote-dm / 带远程桌面的 niri 暂无包，钩子自检并指路 PKGBUILD
+packages_aur = ["noctalia-greeter"]
+label = "Remote Login (RDP)"
+category = "system"
+detect = "remote-dm"
+post_install = "activate"       # → 首次记录改动前状态（/etc/remote-dm/nyxuri-state.json），问 RDP 凭据；重放幂等
+post_remove = "deactivate"      # → 按记录逐项还原，只撤自己创建的证书 / 凭据
+
+[privilege]
+requires_root = true
+system_paths = ["/etc/remote-dm/config.toml", "/etc/remote-dm/nyxuri-state.json", "/etc/gnome-remote-desktop/grd.conf", "/var/lib/gnome-remote-desktop/nyxuri-rdp-tls.{crt,key}"]
 ```
 
 单元 id = 目录名；菜单显示名必须配 i18n `app_<name>`（zh/en 成对，`-` 换 `_`）。

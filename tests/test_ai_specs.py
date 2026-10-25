@@ -332,8 +332,8 @@ class TestAISpecs(unittest.TestCase):
         self.assertFalse((root / "configs").exists(), "blueprint must be renamed")
         units = root / "units"
         self.assertTrue(units.is_dir())
-        self.assertEqual(len([d for d in units.iterdir() if d.is_dir()]), 13,
-                         "blueprint = 12 real units + wallpapers (KM4 adds theme)")
+        self.assertEqual(len([d for d in units.iterdir() if d.is_dir()]), 14,
+                         "blueprint = 12 real units + wallpapers (KM4 adds theme, then remote-login)")
         self.assertFalse((root / "assets").exists())
         self.assertTrue((units / "wallpapers" / "hooks" / "install-pack").is_file())
         self.assertTrue((units / "wallpapers" / "manifest.toml").is_file())

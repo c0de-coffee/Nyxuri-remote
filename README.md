@@ -122,7 +122,7 @@ Nyxuri
 ├── catalog.toml                # package catalogue (18 standalone apps without dotfiles)
 ├── nyxuri/                     # Python core engine (zero pip dependencies)
 ├── shell/                      # Nyxuri Shell (QML/Qt6 desktop shell, experimental)
-└── units/                      # 13 modular desktop capability units
+└── units/                      # 14 modular desktop capability units
     ├── fastfetch/              # system information
     ├── fcitx5-rime/            # dynamic Material You input skin & Rime config
     ├── fish/                   # shell aliases & functions
@@ -131,6 +131,7 @@ Nyxuri
     ├── mango/                  # MangoWM window manager & session scripts
     ├── niri/                   # window manager & session scripts
     ├── noctalia/               # desktop shell, theme sync, Orbit & wallpaper picker
+    ├── remote-login/           # RDP remote login into your own headless niri session
     ├── starship/               # prompt styling
     ├── theme/                  # shared matugen theme template pool
     ├── wallpapers/             # companion wallpapers & video pack hooks
@@ -156,7 +157,7 @@ See complete window navigation and monitor moving shortcuts in [Keybindings (Wik
 
 ## Units & Capabilities
 
-Desktop capabilities are atomic, modular units. Optional units include dynamic Material You fcitx5 input skin (`fcitx5-rime`), companion wallpaper and video pack (`wallpapers`), and Noctalia Greeter login screen (`greeter`). Toggle them on or off anytime: `nyxuri on <unit>` / `nyxuri off <unit>`.
+Desktop capabilities are atomic, modular units. Optional units include dynamic Material You fcitx5 input skin (`fcitx5-rime`), companion wallpaper and video pack (`wallpapers`), Noctalia Greeter login screen (`greeter`), and RDP remote login into your own headless niri session (`remote-login`). Toggle them on or off anytime: `nyxuri on <unit>` / `nyxuri off <unit>`.
 
 For unit lifecycle commands, see [CLI Reference (Wiki)](https://github.com/ech678/Nyxuri/wiki/CLI-Reference#units-the-market-verbs).
 

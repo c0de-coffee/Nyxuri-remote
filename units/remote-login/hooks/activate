@@ -1,0 +1,190 @@
+#!/usr/bin/env python3
+"""remote-login on-hook: RDP remote login with gnome-remote-desktop + remote-dm.
+
+Unit-owned behavior (KM3), run by the transaction from `nyxuri on remote-login` and replayed
+after deploys, so it is idempotent: the first run records the state before any change
+(remote_login_common.STATE) and asks for the RDP credentials; later runs only make sure
+everything is still in place. Any failure on the first run undoes what was done
+(remote_login_common.undo).
+"""
+import getpass
+import os
+import secrets
+import socket
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+# The blueprint is read-only: no __pycache__ next to the shared module, however we're run.
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # standalone runs
+
+import remote_login_common as common  # noqa: E402
+from nyxuri.core import msg  # noqa: E402
+
+
+def _check_prerequisites():
+    if not common.trusted_executable("remote-dm") or not common.niri_has_remote_desktop():
+        print(msg("remote_login_missing_packages"))
+        return False
+    if not common.trusted_executable("grdctl"):
+        print(msg("remote_login_cmd_failed", "grdctl"))
+        return False
+    if common.service_enabled(common.CONFLICT_DM):
+        print(msg("remote_login_gdm_conflict"))
+        return False
+    return True
+
+
+def _initial_state():
+    """What `off` restores to, read before changing anything."""
+    rdm_ok, rdm_config = common.read_root_file(common.RDM_CONFIG)
+    grd_ok, grd_conf = common.read_root_file(common.GRD_CONF)
+    if not rdm_ok or not grd_ok:
+        return None
+    return {
+        "rdm_config": rdm_config,
+        "grd_conf": grd_conf,
+        "grd_enabled": common.service_enabled(common.GRD_SERVICE),
+        "rdm_enabled": common.service_enabled(common.RDM_SERVICE),
+        "tls": False,
+        "credentials": False,
+    }
+
+
+def _tls_configured(status):
+    cert = status.get("TLS certificate", "")
+    key = status.get("TLS key", "")
+    if not cert.startswith("/") or not key.startswith("/"):
+        return False
+    return all(common.run(["sudo", "test", "-f", path])[0] for path in (cert, key))
+
+
+def _generate_tls():
+    """A self-signed certificate for grd, owned by its system user."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        cert = Path(temp_dir) / "cert"
+        key = Path(temp_dir) / "key"
+        ok, _ = common.run([
+            "openssl", "req", "-new", "-newkey", "rsa:3072", "-days", "3650", "-nodes", "-x509",
+            "-subj", f"/CN={socket.gethostname() or 'localhost'}",
+            "-keyout", str(key), "-out", str(cert),
+        ], capture=True)
+        if not ok:
+            return False
+        owner = ["-o", common.GRD_USER, "-g", common.GRD_USER]
+        return (
+            common.run(["sudo", "install", "-D", *owner, "-m", "644", str(cert), str(common.TLS_CERT)])[0]
+            and common.run(["sudo", "install", "-D", *owner, "-m", "600", str(key), str(common.TLS_KEY)])[0]
+            and common.run(["sudo", "grdctl", "--system", "rdp", "set-tls-cert", str(common.TLS_CERT)])[0]
+            and common.run(["sudo", "grdctl", "--system", "rdp", "set-tls-key", str(common.TLS_KEY)])[0]
+        )
+
+
+def _ask_credentials():
+    """(username, password, generated). Asks on a terminal; Enter means a random password."""
+    default_user = os.environ.get("SUDO_USER") or getpass.getuser()
+    if not sys.stdin.isatty():
+        return default_user, secrets.token_urlsafe(12), True
+
+    print(msg("remote_login_cred_intro"))
+    try:
+        username = input(msg("remote_login_cred_user", default_user)).strip() or default_user
+        for _ in range(3):
+            password = getpass.getpass(msg("remote_login_cred_password"))
+            if not password:
+                return username, secrets.token_urlsafe(12), True
+            if getpass.getpass(msg("remote_login_cred_confirm")) == password:
+                return username, password, False
+            print(msg("remote_login_cred_mismatch"))
+    except (EOFError, KeyboardInterrupt):
+        print()
+    return None
+
+
+def _set_credentials(username, password):
+    if "\n" in username or "\n" in password or not username:
+        return False
+    # The password goes through stdin, so it never shows up in the process list. Only the
+    # password: grdctl reads each answer with a fresh buffered stream, so a second line on the
+    # same pipe is lost (and it still exits 0). Hence also the check afterwards.
+    ok, _ = common.run(["sudo", "grdctl", "--system", "rdp", "set-credentials", username],
+                       input_text=f"{password}\n", capture=True)
+    status = common.grd_status() if ok else None
+    return status is not None and status.get("Username") not in (None, "(empty)")
+
+
+def _setup(state):
+    """Bring everything in place; returns False on the first failure."""
+    if not common.write_root_file(common.RDM_CONFIG_CONTENT, common.RDM_CONFIG):
+        print(msg("remote_login_cmd_failed", str(common.RDM_CONFIG)))
+        return False
+
+    status = common.grd_status()
+    if status is None:
+        print(msg("remote_login_cmd_failed", "grdctl --system status"))
+        return False
+
+    if not _tls_configured(status):
+        if not _generate_tls():
+            print(msg("remote_login_cmd_failed", "TLS"))
+            return False
+        state["tls"] = True
+        common.write_state(state)
+        print(msg("remote_login_tls_created", str(common.TLS_CERT)))
+
+    if status.get("Username") == "(empty)":
+        credentials = _ask_credentials()
+        if credentials is None or not _set_credentials(*credentials[:2]):
+            print(msg("remote_login_cmd_failed", "set-credentials"))
+            return False
+        state["credentials"] = True
+        common.write_state(state)
+        username, password, generated = credentials
+        if generated:
+            print(msg("remote_login_cred_generated", username, password))
+
+    if not common.run(["sudo", "grdctl", "--system", "rdp", "enable"])[0]:
+        print(msg("remote_login_cmd_failed", "grdctl --system rdp enable"))
+        return False
+    if not common.run(["sudo", "systemctl", "enable", "--now", common.RDM_SERVICE])[0]:
+        print(msg("remote_login_cmd_failed", common.RDM_SERVICE))
+        return False
+    # Pick up a new certificate or credentials.
+    common.run(["sudo", "systemctl", "try-restart", common.GRD_SERVICE])
+    return True
+
+
+def main():
+    if not _check_prerequisites():
+        return 1
+
+    ok, state = common.read_state()
+    if not ok:
+        print(msg("remote_login_state_invalid", str(common.STATE)))
+        return 1
+    first = state is None
+    if first:
+        state = _initial_state()
+        if state is None or not common.write_state(state):
+            print(msg("remote_login_cmd_failed", str(common.STATE)))
+            return 1
+
+    if not _setup(state):
+        if first:
+            # Leave the machine as it was.
+            if common.undo(state):
+                print(msg("remote_login_rolled_back"))
+            else:
+                print(msg("remote_login_rollback_failed"))
+        return 1
+
+    status = common.grd_status() or {}
+    print(msg("remote_login_ready", status.get("Port", "3389")))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

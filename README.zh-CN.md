@@ -122,7 +122,7 @@ Nyxuri
 ├── catalog.toml                # 软件目录清单（18 款日常软件同源依赖）
 ├── nyxuri/                     # Python 核心引擎（零 pip 依赖）
 ├── shell/                      # Nyxuri Shell（自研 QML/Qt6 桌面外壳，实验性）
-└── units/                      # 13 个独立原子桌面能力单元
+└── units/                      # 14 个独立原子桌面能力单元
     ├── fastfetch/              # 系统信息展示
     ├── fcitx5-rime/            # 动态 Material You 输入法皮肤与配置
     ├── fish/                   # Shell 别名与实用函数
@@ -131,6 +131,7 @@ Nyxuri
     ├── mango/                  # MangoWM 窗口管理器与动作调度脚本
     ├── niri/                   # 窗口管理器与动作调度脚本
     ├── noctalia/               # 桌面外壳、主题同步、Orbit 星环与壁纸选择器
+    ├── remote-login/           # RDP 远程登录，进入自己的无头 niri 会话
     ├── starship/               # 终端提示符
     ├── theme/                  # 共享 matugen 主题模板池
     ├── wallpapers/             # 配套壁纸与动态视频包下载钩子
@@ -156,7 +157,7 @@ Nyxuri
 
 ## 单元能力
 
-桌面上一切能力皆为可独立开关的原子单元。可选单元包括动态取色 Fcitx5 皮肤（`fcitx5-rime`）、配套壁纸与视频包（`wallpapers`），以及一致视觉的 Noctalia Greeter 登录界面（`greeter`）。随时单键启闭：`nyxuri on <unit>` / `nyxuri off <unit>`。
+桌面上一切能力皆为可独立开关的原子单元。可选单元包括动态取色 Fcitx5 皮肤（`fcitx5-rime`）、配套壁纸与视频包（`wallpapers`），一致视觉的 Noctalia Greeter 登录界面（`greeter`），以及 RDP 远程登录、进入自己的无头 niri 会话（`remote-login`）。随时单键启闭：`nyxuri on <unit>` / `nyxuri off <unit>`。
 
 单元生命周期管理详见 [CLI 命令手册 (Wiki)](https://github.com/ech678/Nyxuri/wiki/CLI-Reference-zh#单元市场动词)。
 

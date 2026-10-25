@@ -1,0 +1,25 @@
+# Remote Login — log in to this machine over RDP into your own headless niri session, like
+# GNOME's remote login: gnome-remote-desktop (system mode) + remote-dm (display manager for
+# remote logins) + Noctalia Greeter as the login screen. /etc, /var/lib, root and systemd side
+# effects are all declared here and undone by `off`.
+#
+# remote-dm and a niri with remote desktop support have no repo/AUR packages yet: the activate
+# hook checks for them and names the PKGBUILDs (niri remote-desktop branch, packaging/).
+optional = true
+packages = ["gnome-remote-desktop"]
+packages_aur = ["noctalia-greeter"]
+label = "Remote Login (RDP)"
+category = "system"
+detect = "remote-dm"
+post_install = "activate"
+post_remove = "deactivate"
+
+[privilege]
+requires_root = true
+system_paths = [
+    "/etc/remote-dm/config.toml",
+    "/etc/remote-dm/nyxuri-state.json",
+    "/etc/gnome-remote-desktop/grd.conf",
+    "/var/lib/gnome-remote-desktop/nyxuri-rdp-tls.crt",
+    "/var/lib/gnome-remote-desktop/nyxuri-rdp-tls.key",
+]

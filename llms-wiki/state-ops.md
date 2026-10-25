@@ -82,13 +82,13 @@ nyxuri rollback [index]         # 回滚到指定快照（回滚前自动生成�
 | standard 漏调 greeter 清理 | `[✓] Greeter` 默认勾 | standard 范围默认包含 greeter 单元项 |
 | 旧 quickphrase.conf 修改的清退 | `[✓] fcitx5-rime` 单元项 | `fcitx5-rime` 单元 `hooks/deactivate` 恢复热键并清理皮肤 |
 
-卸载时带钩子单元（`HOOK_UNITS = ("fcitx5-rime", "fish", "greeter", "noctalia")`）统一经 `transaction.unit_off(uid, cascade=True)` 调度执行其专属清理钩子。
+卸载时带钩子单元（`HOOK_UNITS = ("fcitx5-rime", "fish", "greeter", "noctalia", "remote-login")`）统一经 `transaction.unit_off(uid, cascade=True)` 调度执行其专属清理钩子。
 
 ## 卸载执行顺序
 
 ```
-1. 单元钩子清理 FIRST   HOOK_UNITS (fcitx5-rime/greeter/fish/noctalia) 执行 unit_off
-                        （fcitx 读 state_dir 的 .prev 备份；greeter 的 sudo 在这步）
+1. 单元钩子清理 FIRST   HOOK_UNITS (fcitx5-rime/greeter/fish/noctalia/remote-login) 执行 unit_off
+                        （fcitx 读 state_dir 的 .prev 备份；greeter、remote-login 的 sudo 在这步）
 2. configs              归档后删（交互）/ 直接删（purge）
 3. nyx_dir              ~/.config/nyxuri/（快照 + 预设；连带清理历史小写 ~/.config/nyxniri）
 4. archives             只删预存的 Nyxuri_archive_*（保护 step 2 刚建的归档）
@@ -100,4 +100,4 @@ nyxuri rollback [index]         # 回滚到指定快照（回滚前自动生成�
 
 **核心时序**：单元恢复先于 `~/.config/nyxuri/` 删除——fcitx 的 classicui/quickphrase 恢复要读 state_dir/nyx_dir 里的备份，备份目录必须活到单元恢复完成之后。删 Nyxuri dir 永远排在所有单元钩子之后。
 
-> greeter（sudo / 系统领地）在 step 1（单元钩子阶段），技术上早于用户领地删除（step 2-8）。这优先满足钩子先于 nyx_dir 删除的原则；sudo 若失败时用户领地尚未删，反而更安全（未破坏用户环境，可重试）。
+> greeter、remote-login（sudo / 系统领地）在 step 1（单元钩子阶段），技术上早于用户领地删除（step 2-8）。这优先满足钩子先于 nyx_dir 删除的原则；sudo 若失败时用户领地尚未删，反而更安全（未破坏用户环境，可重试）。

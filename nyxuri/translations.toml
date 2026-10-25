@@ -698,6 +698,10 @@ en = "Fcitx5 + Rime Ice (Input Method)"
 zh = "Noctalia Greeter (greetd 登录界面)"
 en = "Noctalia Greeter (greetd login screen)"
 
+[app_remote_login]
+zh = "远程登录 (RDP)"
+en = "Remote Login (RDP)"
+
 [app_mango]
 zh = "Mango WM (Wayland 合成器)"
 en = "Mango WM (Wayland compositor)"
@@ -829,6 +833,70 @@ en = "{Colors.BOLD_GREEN}[✓] Removed state directory: {0}{Colors.RESET}"
 [greeter_uninstall_done]
 zh = "{Colors.BOLD_GREEN}[✓] 登录界面已卸载。若需移除软件包: paru -R noctalia-greeter greetd{Colors.RESET}"
 en = "{Colors.BOLD_GREEN}[✓] Login screen uninstalled. To remove packages: paru -R noctalia-greeter greetd{Colors.RESET}"
+
+[remote_login_missing_packages]
+zh = "{Colors.BOLD_RED}[!] 缺 remote-dm 或带远程桌面支持的 niri。它们还没有现成的包：用 niri remote-desktop 分支 packaging/ 下的 PKGBUILD（niri-remote-desktop-git、remote-dm-git）编译安装后再启用{Colors.RESET}"
+en = "{Colors.BOLD_RED}[!] Missing remote-dm or a niri with remote desktop support. There are no ready-made packages yet: build them with the PKGBUILDs in packaging/ of niri's remote-desktop branch (niri-remote-desktop-git, remote-dm-git), then enable again{Colors.RESET}"
+
+[remote_login_cmd_failed]
+zh = "{Colors.BOLD_RED}[!] 失败: {0}{Colors.RESET}"
+en = "{Colors.BOLD_RED}[!] Failed: {0}{Colors.RESET}"
+
+[remote_login_gdm_conflict]
+zh = "{Colors.BOLD_RED}[!] GDM 已启用。它和 remote-dm 抢同一个 D-Bus 名字，两个不能同时用；先换成别的显示管理器（比如 {CLI_CMD} on greeter）{Colors.RESET}"
+en = "{Colors.BOLD_RED}[!] GDM is enabled. It owns the same D-Bus name as remote-dm, so they can't run together; switch to another display manager first (e.g. {CLI_CMD} on greeter){Colors.RESET}"
+
+[remote_login_tls_created]
+zh = "{Colors.BOLD_GREEN}[✓] 已生成自签名 TLS 证书 {0}{Colors.RESET}"
+en = "{Colors.BOLD_GREEN}[✓] Generated a self-signed TLS certificate: {0}{Colors.RESET}"
+
+[remote_login_cred_intro]
+zh = "{Colors.BOLD_CYAN}设置 RDP 连接的用户名和密码（远程客户端先用它连上，再在登录界面登录自己的账号）。密码直接回车则随机生成。{Colors.RESET}"
+en = "{Colors.BOLD_CYAN}Set the RDP username and password (clients connect with these first, then log in to their own account on the login screen). Press Enter at the password to generate one.{Colors.RESET}"
+
+[remote_login_cred_user]
+zh = "用户名 [{0}]: "
+en = "Username [{0}]: "
+
+[remote_login_cred_password]
+zh = "密码: "
+en = "Password: "
+
+[remote_login_cred_confirm]
+zh = "再输一次: "
+en = "Again: "
+
+[remote_login_cred_mismatch]
+zh = "{Colors.BOLD_YELLOW}两次不一样，再来{Colors.RESET}"
+en = "{Colors.BOLD_YELLOW}They don't match, try again{Colors.RESET}"
+
+[remote_login_cred_generated]
+zh = "{Colors.BOLD_GREEN}[✓] RDP 用户名: {0}  密码: {1}{Colors.RESET}（只显示这一次；改密码: sudo grdctl --system rdp set-credentials）"
+en = "{Colors.BOLD_GREEN}[✓] RDP username: {0}  password: {1}{Colors.RESET} (shown only now; to change: sudo grdctl --system rdp set-credentials)"
+
+[remote_login_state_invalid]
+zh = "{Colors.BOLD_RED}[!] 状态记录 {0} 读不了或已损坏，什么都没改{Colors.RESET}"
+en = "{Colors.BOLD_RED}[!] State record {0} is unreadable or damaged; nothing changed{Colors.RESET}"
+
+[remote_login_rolled_back]
+zh = "{Colors.BOLD_YELLOW}[!] 已撤回这次的改动{Colors.RESET}"
+en = "{Colors.BOLD_YELLOW}[!] Rolled back this attempt{Colors.RESET}"
+
+[remote_login_rollback_failed]
+zh = "{Colors.BOLD_RED}[!] 有些改动没能撤回，状态记录留在 /etc/remote-dm/nyxuri-state.json，再运行一次 {CLI_CMD} off remote-login{Colors.RESET}"
+en = "{Colors.BOLD_RED}[!] Some changes could not be undone; the state record stays in /etc/remote-dm/nyxuri-state.json. Run {CLI_CMD} off remote-login again{Colors.RESET}"
+
+[remote_login_ready]
+zh = "{Colors.BOLD_GREEN}[✓] 远程登录已开启：用 RDP 客户端连这台机器的 {0} 端口{Colors.RESET}"
+en = "{Colors.BOLD_GREEN}[✓] Remote login is on: connect with an RDP client to port {0} of this machine{Colors.RESET}"
+
+[remote_login_nothing_to_undo]
+zh = "{Colors.DARK_GRAY}没有远程登录的改动记录，无需撤回{Colors.RESET}"
+en = "{Colors.DARK_GRAY}No remote login changes recorded; nothing to undo{Colors.RESET}"
+
+[remote_login_uninstall_done]
+zh = "{Colors.BOLD_GREEN}[✓] 远程登录已关闭，配置已还原。若需移除软件包: sudo pacman -R remote-dm-git；niri 换回官方版: sudo pacman -S niri{Colors.RESET}"
+en = "{Colors.BOLD_GREEN}[✓] Remote login is off and its configuration restored. To remove packages: sudo pacman -R remote-dm-git; back to the official niri: sudo pacman -S niri{Colors.RESET}"
 
 [backing_up]
 zh = """\n{Colors.BOLD_BLUE}:: 正在创建配置快照…{Colors.RESET}"""
