@@ -125,6 +125,42 @@ function M.setCredentials(username, password, cb)
   end, AUTH_TIMEOUT_MS)
 end
 
+-- cb(count): user sessions remote-dm opened (each remote login gets its own; one that lost its
+-- client stays until the user logs out, like on GNOME). 0 when logind can't be asked.
+function M.remoteSessions(cb)
+  noctalia.runAsync({ "loginctl", "list-sessions", "--no-legend" }, function(result)
+    local ids = {}
+    for line in string.gmatch(result.stdout or "", "[^\n]+") do
+      local id = string.match(line, "^%s*(%S+)")
+      if id then
+        table.insert(ids, id)
+      end
+    end
+    if result.exitCode ~= 0 or #ids == 0 then
+      cb(0)
+      return
+    end
+    local argv = { "loginctl", "show-session" }
+    for _, id in ids do
+      table.insert(argv, id)
+    end
+    for _, arg in { "-p", "Service", "-p", "Class" } do
+      table.insert(argv, arg)
+    end
+    noctalia.runAsync(argv, function(show)
+      local count = 0
+      -- One block of Key=value lines per session, separated by blank lines.
+      for block in string.gmatch((show.stdout or "") .. "\n\n", "(.-)\n\n") do
+        local lines = block .. "\n"
+        if string.find(lines, "Service=remote-dm\n", 1, true) and string.find(lines, "Class=user\n", 1, true) then
+          count += 1
+        end
+      end
+      cb(count)
+    end)
+  end)
+end
+
 function M.hostname()
   local content = noctalia.readFile("/etc/hostname")
   local name = if content then noctalia.string.trim(content) else ""

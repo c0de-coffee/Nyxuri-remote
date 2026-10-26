@@ -13,6 +13,9 @@ local username = ""
 local password = ""
 local revealPassword = false
 local fieldsKey = 0 -- bumped to reset the inputs to username/password
+-- The fields hold the credentials read from grd ("Show current"): those are cleared when the
+-- panel closes. What the user typed themselves is kept, so a click outside doesn't lose it.
+local loaded = false
 
 -- The polkit prompt is a panel too, and the shell shows one panel at a time: asking for a
 -- password closes this one. When the answer comes back, reopen it with the result.
@@ -53,7 +56,7 @@ end
 local function header()
   local canToggle = status ~= nil and status.setUp and status.reachable and not busy
   return ui.row({ gap = 12, align = "center" }, {
-    ui.glyph({ name = "screen-share", size = 26, color = "primary" }),
+    ui.glyph({ name = "device-desktop-share", size = 26, color = "primary" }),
     ui.column({ gap = 2, flexGrow = 1 }, {
       ui.label({ text = noctalia.tr("title"), fontSize = 16, fontWeight = "semibold" }),
       caption(noctalia.tr("subtitle")),
@@ -63,6 +66,7 @@ local function header()
       enabled = canToggle,
       onChange = "onToggle",
     }),
+    ui.button({ glyph = "x", variant = "ghost", controlSize = "sm", tooltip = noctalia.tr("close"), onClick = "onCloseButton" }),
   })
 end
 
@@ -159,6 +163,8 @@ end
 local function refresh()
   grd.readStatus(function(result)
     status = result
+    -- For the bar icon and the control center tile.
+    noctalia.state.set("enabled", result.setUp and result.reachable and result.enabled == true)
     if isOpen then
       render()
     end
@@ -187,8 +193,6 @@ function onOpen(_context)
   status = nil
   busy = false
   setMessage("")
-  username = ""
-  password = ""
   revealPassword = false
   fieldsKey += 1
   render()
@@ -201,11 +205,18 @@ function onClose()
     -- Closed by the polkit prompt; the call is still going.
     return
   end
-  -- Don't keep what was typed or loaded around.
-  username = ""
-  password = ""
+  -- Don't keep credentials read from grd around; a draft the user typed stays.
+  if loaded then
+    username = ""
+    password = ""
+    loaded = false
+  end
   revealPassword = false
   fieldsKey += 1
+end
+
+function onCloseButton()
+  panel.close()
 end
 
 function onRefresh()
@@ -268,6 +279,7 @@ function onLoad()
     else
       username = user
       password = pass
+      loaded = true
       fieldsKey += 1
       setMessage("")
     end

@@ -33,5 +33,14 @@
     "failed": "That didn't work; see the Noctalia log.",
     "username_required": "Enter a username."
   },
-  "agent_off": "Changes need Noctalia's polkit agent, which is off: turn on Settings → Security → Polkit Agent."
+  "agent_off": "Changes need Noctalia's polkit agent, which is off: turn on Settings → Security → Polkit Agent.",
+  "close": "Close",
+  "widget": {
+    "on": "On",
+    "off": "Off",
+    "sessions": {
+      "one": "{count} remote session",
+      "other": "{count} remote sessions"
+    }
+  }
 }

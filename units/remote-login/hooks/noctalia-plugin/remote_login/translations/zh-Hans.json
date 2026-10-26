@@ -33,5 +33,14 @@
     "failed": "没成功，详情见 Noctalia 的日志。",
     "username_required": "请填写用户名。"
   },
-  "agent_off": "修改设置需要 Noctalia 的 polkit 代理，它现在是关的：在 设置 → 安全 → Polkit 代理 打开。"
+  "agent_off": "修改设置需要 Noctalia 的 polkit 代理，它现在是关的：在 设置 → 安全 → Polkit 代理 打开。",
+  "close": "关闭",
+  "widget": {
+    "on": "已开启",
+    "off": "已关闭",
+    "sessions": {
+      "one": "{count} 个远程会话",
+      "other": "{count} 个远程会话"
+    }
+  }
 }

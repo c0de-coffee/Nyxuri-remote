@@ -7,13 +7,13 @@
 
 id = "nyxuri/remote_login"
 name = "Remote Login"
-version = "1.0.0"
+version = "1.1.0"
 plugin_api = 26
 author = "nyxuri"
 license = "GPL-3.0-or-later"
 dependencies = ["busctl", "gnome-remote-desktop"]
 tags = ["system", "remote"]
-icon = "screen-share"
+icon = "device-desktop-share"
 description = "Log in to this computer over RDP: turn it on or off, see how to connect, and set the RDP sign-in."
 
 [[panel]]
@@ -24,10 +24,15 @@ height = 540
 placement = "floating"
 position = "center"
 keyboard_focus = "on_demand"
-# A misclick shouldn't throw away a half-typed password.
-dismiss_on_outside_click = false
+# Closes on outside click like other shell panels; a new password being typed survives that
+# (panel.luau keeps it until the next open).
 
 # Control center tile that opens the panel.
 [[shortcut]]
 id = "shortcut"
 entry = "shortcut.luau"
+
+# Bar icon: slashed while RDP is off, shows how many remote sessions are open; opens the panel.
+[[widget]]
+id = "widget"
+entry = "widget.luau"

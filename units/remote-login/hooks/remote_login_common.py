@@ -209,6 +209,7 @@ def install_plugin():
     if not shutil.which("noctalia"):
         return False, False
     dest = plugin_dir()
+    changed = False
     try:
         wanted = set()
         for source in sorted(PLUGIN_SOURCE.rglob("*")):
@@ -223,15 +224,21 @@ def install_plugin():
             # on changes, which a new inode would escape.
             if not target.is_file() or target.read_bytes() != content:
                 target.write_bytes(content)
+                changed = True
         for stale in sorted(dest.rglob("*"), reverse=True):
             rel = stale.relative_to(dest)
             if stale.is_file() and rel not in wanted:
                 stale.unlink()
+                changed = True
             elif stale.is_dir() and not any(stale.iterdir()):
                 stale.rmdir()
     except OSError:
         return False, False
-    # Needs a running Noctalia; otherwise Settings -> Plugins does it.
+    # Noctalia hot-reloads the scripts, but registers the entries (panel options, a new bar
+    # widget) only when the plugin is enabled: after a change, disable it first so it picks up
+    # the new manifest. Needs a running Noctalia; otherwise Settings -> Plugins does it.
+    if changed:
+        run(["noctalia", "msg", "plugins", "disable", PLUGIN_ID], capture=True)
     enabled, _ = run(["noctalia", "msg", "plugins", "enable", PLUGIN_ID], capture=True)
     return True, enabled
 

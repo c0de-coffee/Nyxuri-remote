@@ -343,7 +343,7 @@ class TestNoctaliaPlugin(RemoteLoginHookTest):
         with self._with_noctalia():
             self.assertEqual(self.activate.main(), 0)
 
-        for name in ("plugin.toml", "panel.luau", "shortcut.luau", "grd.luau", "translations/en.json"):
+        for name in ("plugin.toml", "panel.luau", "shortcut.luau", "widget.luau", "grd.luau", "translations/en.json"):
             self.assertEqual((self.dest / name).read_bytes(), (self.source / name).read_bytes(), name)
         self.assertIn(self.PLUGIN + ["enable", "nyxuri/remote_login"], self.machine.calls)
 
@@ -360,6 +360,20 @@ class TestNoctaliaPlugin(RemoteLoginHookTest):
         self.assertEqual(panel.read_bytes(), (self.source / "panel.luau").read_bytes())
         self.assertEqual(panel.stat().st_ino, inode)  # Noctalia's file watch keeps working
         self.assertFalse((self.dest / "gone.luau").exists())
+        # Re-registered, so a changed manifest takes effect.
+        disable = self.PLUGIN + ["disable", "nyxuri/remote_login"]
+        enable = self.PLUGIN + ["enable", "nyxuri/remote_login"]
+        calls = self.machine.calls
+        last_enable = len(calls) - 1 - calls[::-1].index(enable)
+        self.assertEqual(calls[last_enable - 1], disable)
+
+    def test_unchanged_replay_does_not_reregister(self):
+        with self._with_noctalia():
+            self.assertEqual(self.activate.main(), 0)
+            self.machine.calls.clear()
+            self.assertEqual(self.activate.main(), 0)
+        self.assertNotIn(self.PLUGIN + ["disable", "nyxuri/remote_login"], self.machine.calls)
+        self.assertIn(self.PLUGIN + ["enable", "nyxuri/remote_login"], self.machine.calls)
 
     def test_noctalia_not_running_still_installs(self):
         self.machine.noctalia_running = False
