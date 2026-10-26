@@ -14,8 +14,9 @@
 | `nyxuri doctor [unit]` | Three-state reconciliation (`Synced` / `Drifted` / `Ghost`) plus a system checkup |
 
 Everything on the desktop is a unit — including wallpapers: `nyxuri on wallpapers`
-deploys the built-in fallback into `~/Pictures/Wallpapers`; the full video pack is
-user-domain content installed via `units/wallpapers/hooks/install-pack`.
+deploys the built-in fallback into `Wallpapers` under your XDG pictures directory
+(`~/Pictures/Wallpapers` on an English system); the full video pack is user-domain content
+installed via `units/wallpapers/hooks/install-pack` (the installer's wallpaper option runs it).
 
 ---
 

@@ -14,7 +14,8 @@
 | `nyxuri doctor [unit]` | 单元三态对账（`Synced` / `Drifted` / `Ghost`）+ 系统体检 |
 
 桌面上一切皆单元——壁纸也是：`nyxuri on wallpapers` 部署内置 fallback 到
-`~/Pictures/Wallpapers`；完整视频包属用户内容，用 `units/wallpapers/hooks/install-pack` 安装。
+XDG 图片目录下的 `Wallpapers`（中文系统是 `~/图片/Wallpapers`）；完整视频包属用户内容，用
+`units/wallpapers/hooks/install-pack` 安装（安装器勾选壁纸包时会自动运行它）。
 
 ---
 

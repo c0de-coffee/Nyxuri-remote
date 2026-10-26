@@ -18,6 +18,7 @@ from nyxuri.deploy import (
 from nyxuri.deploy.deploy import (
     enable_theme_unit as _enable_theme,
     enable_wallpapers_unit as _enable_wallpapers,
+    install_wallpaper_pack,
     wallpapers_pack_present,
 )
 from nyxuri.pkg.deps import get_missing_deps, install_selected_deps
@@ -200,8 +201,9 @@ def install_configs_workflow(mode: str = "full") -> bool:
 
     # 3. Wallpapers — the unit path: `on wallpapers` syncs the blueprint
     # fallback into the shared living area (no-clobber). The external pack
-    # is user-domain content (units/wallpapers/hooks/install-pack), never
-    # an install phase. The theme pool (shared template living area) rides
+    # is user-domain content (units/wallpapers/hooks/install-pack, never
+    # ledger-tracked); the checked menu item fetches it with that script
+    # when it isn't there yet. The theme pool (shared template living area) rides
     # the same unit path: `on theme` no-clobber merges the blueprint
     # templates; user-edited templates are never clobbered.
     wallpaper_ok = None
@@ -209,6 +211,10 @@ def install_configs_workflow(mode: str = "full") -> bool:
         cur_step += 1
         print(msg("install_step_wallpapers", f"{cur_step}/{steps}"))
         wallpaper_ok = _enable_wallpapers()
+        # The menu item is the wallpaper *pack* ("Wallpapers & Videos"):
+        # the unit only lays the offline fallback, so fetch the pack too.
+        if wallpaper_ok and not wallpapers_pack_present():
+            wallpaper_ok = install_wallpaper_pack()
     _enable_theme()
 
     # 4. Unit hook replay: already-enabled units re-run their declared

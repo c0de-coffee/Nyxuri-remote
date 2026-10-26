@@ -511,6 +511,34 @@ def enable_wallpapers_unit() -> Optional[bool]:
         return False
 
 
+def install_wallpaper_pack() -> bool:
+    """Download the external wallpaper pack (the unit's ``install-pack``)
+    into the shared living area. No-clobber and idempotent; needs network.
+    Called when the installer's wallpaper pack option is checked."""
+    import subprocess
+
+    env = get_env()
+    unit_src = env.units_src / "wallpapers"
+    script = unit_src / "hooks" / "install-pack"
+    if not script.is_file():
+        log_msg("WARN", f"wallpaper pack installer missing: {script}")
+        return False
+    dest = living_path(load_manifest(unit_src), env.config_dir)
+    try:
+        res = subprocess.run(
+            ["bash", str(script)],
+            env={**os.environ, "NYXURI_UNIT_DEST": str(dest)},
+            check=False,
+        )
+    except OSError as exc:
+        log_msg("WARN", f"wallpaper pack install failed: {exc}")
+        return False
+    if res.returncode != 0:
+        log_msg("WARN", f"wallpaper pack install failed (exit {res.returncode})")
+        return False
+    return wallpapers_pack_present()
+
+
 def enable_theme_unit() -> Optional[bool]:
     """Best-effort ``on theme`` for deploy flows: the shared template pool is
     load-bearing for both shells' gtk/niri/palette renders (KM4/P5 neutral
