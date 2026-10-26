@@ -9,7 +9,7 @@ preserves ``monitor.kdl``; missioncenter's package is ``mission-center``).
 Schema (all fields optional, flat at top level)::
 
     target = "starship.toml"   # single-file unit: lands at ~/.config/<target>
-    target = "~/Pictures/Wallpapers"  # shared living area (implies merge use)
+    target = "$XDG_PICTURES_DIR/Wallpapers"  # shared living area (implies merge use)
     merge = true               # shared living area: no-clobber deploy, off
                                # withdraws only laid files (never rm -rf)
     runtime = true             # ledger-only unit: no living area, no deploy;
@@ -138,14 +138,22 @@ def _as_str_map(value) -> Dict[str, List[str]]:
     return result
 
 
+XDG_PICTURES = "$XDG_PICTURES_DIR"
+
+
 def living_path(m: ModuleManifest, config_dir: Path) -> Path:
     """A unit's living-area path (unit-model.md §4 target exception).
 
     A ``~/``-prefixed (or absolute) ``target`` declares a shared living area
     outside ``~/.config`` — expanded against ``$HOME``. A bare ``target`` is
     the single-file exception under ``~/.config``; no target means
-    ``~/.config/<unit>``.
+    ``~/.config/<unit>``. A ``$XDG_PICTURES_DIR/``-prefixed ``target`` lives
+    in the user's XDG pictures directory (``~/图片`` on a Chinese system),
+    the same place the templates and the wallpaper picker look.
     """
+    if m.target == XDG_PICTURES or m.target.startswith(XDG_PICTURES + "/"):
+        from nyxuri.core import get_pics_dir
+        return get_pics_dir() / m.target[len(XDG_PICTURES):].lstrip("/")
     if m.target.startswith(("~", "/")):
         return Path(os.path.expanduser(m.target))
     return config_dir / (m.target or m.name)

@@ -488,3 +488,30 @@ class TestManifestCoercion(unittest.TestCase):
             apps = _quiet(discover_manifest_apps)
             self.assertIsInstance(apps, list)
             self.assertEqual([n for n, _ in apps], ["good-unit"])
+
+
+class TestLivingPathXdgPictures(unittest.TestCase):
+    """`$XDG_PICTURES_DIR/…` targets follow the XDG pictures directory."""
+
+    def _manifest(self, target):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = Path(tmp) / "wallpapers"
+            unit.mkdir()
+            (unit / "manifest.toml").write_text(
+                f'merge = true\ntarget = "{target}"\n', encoding="utf-8"
+            )
+            return manifest.load_manifest(unit)
+
+    def test_xdg_pictures_target_uses_pics_dir(self):
+        from unittest import mock
+
+        m = self._manifest("$XDG_PICTURES_DIR/Wallpapers")
+        with mock.patch("nyxuri.core.get_pics_dir", return_value=Path("/home/u/图片")):
+            self.assertEqual(
+                manifest.living_path(m, Path("/home/u/.config")), Path("/home/u/图片/Wallpapers")
+            )
+
+    def test_wallpapers_unit_declares_xdg_target(self):
+        repo = Path(__file__).resolve().parents[2]
+        data = tomllib.loads((repo / "units/wallpapers/manifest.toml").read_text(encoding="utf-8"))
+        self.assertEqual(data["target"], "$XDG_PICTURES_DIR/Wallpapers")

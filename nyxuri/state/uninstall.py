@@ -27,6 +27,14 @@ from nyxuri.tui import CheckboxEntry, CheckboxList, drain_stdin, prompt_confirm
 from nyxuri.state.backup import get_all_backups, rollback_configs
 
 
+def _home_relative(path: Path) -> str:
+    """``~/…`` for paths under $HOME (menu labels)."""
+    try:
+        return "~/" + str(path.relative_to(get_env().home))
+    except ValueError:
+        return str(path)
+
+
 def _rm_report(path: Path) -> None:
     """Remove a path and print a result line ([✓] removed / [!] skipped)."""
     if path.is_symlink() or path.exists():
@@ -82,7 +90,7 @@ def uninstall_nyxuri(mode: str = "") -> bool:
         CheckboxEntry(key="configs", label=msg("uninstall_item_configs", len(items)), checked=True),
         CheckboxEntry(key="nyx_dir", label=msg("uninstall_item_nyx_dir"), checked=False),
         CheckboxEntry(key="archives", label=msg("uninstall_item_archives"), checked=False),
-        CheckboxEntry(key="wallpapers", label=msg("uninstall_item_wallpapers"), checked=False),
+        CheckboxEntry(key="wallpapers", label=msg("uninstall_item_wallpapers", _home_relative(get_pics_dir() / "Wallpapers")), checked=False),
         CheckboxEntry(key="__sep_self__", label=msg("uninstall_group_self"), is_separator=True),
         CheckboxEntry(key="cli", label=msg("uninstall_item_cli"), checked=True),
         CheckboxEntry(key="state", label=msg("uninstall_item_state"), checked=False),
