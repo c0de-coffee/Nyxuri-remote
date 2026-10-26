@@ -35,6 +35,11 @@ def _check_prerequisites():
     if common.service_enabled(common.CONFLICT_DM):
         print(msg("remote_login_gdm_conflict"))
         return False
+    # Disabled but still running (no reboot since `on greeter`): it still holds the D-Bus
+    # name, so systemd would refuse to start remote-dm.
+    if common.service_active(common.CONFLICT_DM):
+        print(msg("remote_login_gdm_running"))
+        return False
     return True
 
 

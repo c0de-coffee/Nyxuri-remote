@@ -846,6 +846,10 @@ en = "{Colors.BOLD_RED}[!] Failed: {0}{Colors.RESET}"
 zh = "{Colors.BOLD_RED}[!] GDM 已启用。它和 remote-dm 抢同一个 D-Bus 名字，两个不能同时用；先换成别的显示管理器（比如 {CLI_CMD} on greeter）{Colors.RESET}"
 en = "{Colors.BOLD_RED}[!] GDM is enabled. It owns the same D-Bus name as remote-dm, so they can't run together; switch to another display manager first (e.g. {CLI_CMD} on greeter){Colors.RESET}"
 
+[remote_login_gdm_running]
+zh = "{Colors.BOLD_RED}[!] GDM 已停用但还在运行（换显示管理器后还没重启）。它还占着 remote-dm 要用的 D-Bus 名字；重启后再启用{Colors.RESET}"
+en = "{Colors.BOLD_RED}[!] GDM is disabled but still running (no reboot since switching display managers). It still holds the D-Bus name remote-dm needs; reboot, then enable again{Colors.RESET}"
+
 [remote_login_tls_created]
 zh = "{Colors.BOLD_GREEN}[✓] 已生成自签名 TLS 证书 {0}{Colors.RESET}"
 en = "{Colors.BOLD_GREEN}[✓] Generated a self-signed TLS certificate: {0}{Colors.RESET}"

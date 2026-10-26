@@ -39,6 +39,7 @@ class FakeMachine:
     def __init__(self, root: Path):
         self.root = root
         self.enabled = set()
+        self.active = set()
         self.credentials = None
         self.tls = None
         self.calls = []
@@ -87,6 +88,8 @@ class FakeMachine:
             service = cmd[-1]
             if cmd[1] == "is-enabled":
                 return self._result(service in self.enabled)
+            if cmd[1] == "is-active":
+                return self._result(service in self.active)
             if cmd[1] == "enable":
                 self.enabled.add(service)
             if cmd[1] == "disable":
@@ -260,6 +263,12 @@ class TestActivate(RemoteLoginHookTest):
         self.assertEqual(self.activate.main(), 1)
         self.assertFalse(self.state.exists())
         self.assertEqual(self.rdm_config.read_text(encoding="utf-8"), "# packaged defaults\n")
+        self.assertFalse(any(call[:1] == ["sudo"] for call in self.machine.calls))
+
+    def test_running_gdm_blocks_activation_until_reboot(self):
+        self.machine.active.add("gdm")
+        self.assertEqual(self.activate.main(), 1)
+        self.assertFalse(self.state.exists())
         self.assertFalse(any(call[:1] == ["sudo"] for call in self.machine.calls))
 
     def test_missing_packages_block_activation(self):

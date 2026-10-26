@@ -147,6 +147,11 @@ def service_enabled(service):
     return ok
 
 
+def service_active(service):
+    ok, _ = run(["systemctl", "is-active", "--quiet", service])
+    return ok
+
+
 def grd_status():
     """`grdctl --system status` as {key: value} (credentials stay hidden)."""
     ok, out = run(["sudo", "grdctl", "--system", "status"], capture=True)
