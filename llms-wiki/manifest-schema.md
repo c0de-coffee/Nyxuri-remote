@@ -158,7 +158,7 @@ system_paths = ["/etc/greetd/config.toml", "/etc/polkit-1/rules.d/50-noctalia-gr
 
 # units/remote-login/manifest.toml — RDP 远程登录（grd 系统模式 + remote-dm），纯钩子单元
 optional = true
-packages = ["gnome-remote-desktop"]   # remote-dm / 带远程桌面的 niri 暂无包，钩子自检并指路 PKGBUILD
+packages = ["gnome-remote-desktop"]   # remote-dm / 带远程桌面的 niri 暂无包，钩子自检并指路 GitHub Release（或 PKGBUILD）
 packages_aur = ["noctalia-greeter"]
 label = "Remote Login (RDP)"
 category = "system"

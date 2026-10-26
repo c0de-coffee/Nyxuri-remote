@@ -22,9 +22,11 @@
 >   administrator password. Open it from the control center shortcut or with
 >   `noctalia msg panel-toggle nyxuri/remote_login:panel`.
 > - It needs a niri with remote desktop support and remote-dm, both from the `remote-desktop`
->   branch of [c0de-coffee/niri](https://github.com/c0de-coffee/niri): build the Arch packages in
->   its [`packaging/`](https://github.com/c0de-coffee/niri/tree/remote-desktop/packaging)
->   (`niri-remote-desktop-git`, `remote-dm-git`). The unit tells you if they're missing.
+>   branch of [c0de-coffee/niri](https://github.com/c0de-coffee/niri): install the Arch packages
+>   from its [releases](https://github.com/c0de-coffee/niri/releases) (`niri-remote-desktop`,
+>   `remote-dm`), or build them with the PKGBUILDs in its
+>   [`packaging/`](https://github.com/c0de-coffee/niri/tree/remote-desktop/packaging). The unit
+>   tells you if they're missing.
 >
 > Problems with remote login belong in this repository, not upstream.
 >

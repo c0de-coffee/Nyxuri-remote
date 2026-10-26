@@ -18,8 +18,9 @@
 >   用户名和密码。修改经过 gnome-remote-desktop 的配置服务，由 Noctalia 的 polkit 代理弹出管理员密码框。
 >   从控制中心的快捷入口打开，或运行 `noctalia msg panel-toggle nyxuri/remote_login:panel`。
 > - 它需要带远程桌面支持的 niri 和 remote-dm，两者都在 [c0de-coffee/niri](https://github.com/c0de-coffee/niri)
->   的 `remote-desktop` 分支：用它 [`packaging/`](https://github.com/c0de-coffee/niri/tree/remote-desktop/packaging)
->   下的 PKGBUILD 编译安装（`niri-remote-desktop-git`、`remote-dm-git`）。缺了的话单元会提示。
+>   的 `remote-desktop` 分支：从它的 [Releases](https://github.com/c0de-coffee/niri/releases) 下载 Arch 包
+>   （`niri-remote-desktop`、`remote-dm`）安装，或者用 [`packaging/`](https://github.com/c0de-coffee/niri/tree/remote-desktop/packaging)
+>   下的 PKGBUILD 自己编译。缺了的话单元会提示。
 >
 > 远程登录相关的问题请在这个仓库提，不要找原作者。
 >
