@@ -40,6 +40,7 @@ from nyxuri.deploy.atomic import CarryPolicy
 from nyxuri.deploy.deploy import _phase_atomic_deployment, merge_deploy_unit
 from nyxuri.deploy.manifest import ModuleManifest, living_path
 from nyxuri.deploy.preset import write_active_preset
+from nyxuri.deploy.templates import _phase_render_templates
 from nyxuri.kernel.resolver import resolve_order
 
 STATE_SYNCED = "Synced"
@@ -646,6 +647,11 @@ def unit_on(
                     results.append(Step(uid, False, "deploy-failed"))
                     return results
                 files = {rel: _hash_file(dest / rel) for rel in laid}
+            elif not manifest.is_deployable:
+                # Hook-only unit (greeter, remote-login): no payload to lay.
+                # The atomic deploy would only trip over the missing preset
+                # state and print a misleading "invalid active preset" warning.
+                pass
             else:
                 # `on` is adoption: the engine claims its payload names
                 # (carry_unknown=False), user-placed extras are carried and
@@ -661,6 +667,10 @@ def unit_on(
                 if uid in _phase_atomic_deployment([uid], carry_policy=policy):
                     results.append(Step(uid, False, "deploy-failed"))
                     return results
+                # Portable paths (/home/user, the pictures dir) get rendered
+                # like the installer's deploy does, before the snapshot so
+                # the rendered files are what the ledger records.
+                _phase_render_templates(only_app=uid)
                 files = snapshot_files(dest, manifest)
                 # Carried files stay user-owned: they must never enter the
                 # snapshot, or the next deploy would mistake them for

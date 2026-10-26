@@ -756,3 +756,45 @@ class TestLedgerResilience(unittest.TestCase):
                 os.waitpid(pid, 0)
             data = ledger.read_ledger()
             self.assertEqual([data.get(f"k{i}") for i in range(6)], list(range(6)))
+
+
+class TestUnitOnPortablePathsAndHookOnly(unittest.TestCase):
+    """`on` renders portable paths like the installer deploy does, and
+    hook-only units skip the deploy without a bogus preset warning."""
+
+    def setUp(self):
+        patcher = mock.patch.object(transaction, "missing_packages", return_value=[])
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_on_renders_home_placeholder_before_snapshot(self):
+        with TempEnv() as ctx:
+            _stage(ctx, {"fish": {"files": {
+                "fish_variables": "SETUVAR wp:/home/user/Pictures\n",
+            }}})
+            steps = transaction.unit_on("fish")
+            self.assertTrue(steps[0].ok, str(steps))
+            dest = ctx.home / ".config/fish/fish_variables"
+            content = dest.read_text(encoding="utf-8")
+            self.assertNotIn("/home/user", content)
+            self.assertIn(f"{ctx.home}/Pictures", content)
+            # The ledger records the rendered file, so the unit isn't Drifted.
+            rec = ledger.get_unit("fish")
+            self.assertEqual(
+                rec["files"]["fish_variables"], hashlib.sha256(dest.read_bytes()).hexdigest()
+            )
+
+    def test_on_hook_only_unit_skips_deploy_quietly(self):
+        import contextlib
+        import io
+
+        with TempEnv() as ctx:
+            _stage(ctx, {"greeter": {"manifest": "packages = []\n"}})
+            out = io.StringIO()
+            with mock.patch.object(transaction, "_phase_atomic_deployment") as deploy, \
+                    contextlib.redirect_stdout(out):
+                steps = transaction.unit_on("greeter")
+            self.assertTrue(steps[0].ok, str(steps))
+            deploy.assert_not_called()
+            self.assertEqual(out.getvalue(), "")
+            self.assertEqual(ledger.get_unit("greeter")["state"], "enabled")
