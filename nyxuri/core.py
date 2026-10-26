@@ -88,6 +88,8 @@ CORE_DEPS = [
     "noto-fonts-cjk",
     "qt6-imageformats",
     "cliphist",
+    # desktop/theme.py sets the GTK theme to adw-gtk3(-dark).
+    "adw-gtk-theme",
 ]
 
 # Desktop integrations are selectable components; the management engine does

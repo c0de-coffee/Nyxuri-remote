@@ -46,6 +46,7 @@ optdepends=(
   'gtk-layer-shell: noctalia'
   'wl-clipboard: noctalia'
   'python-cairo: noctalia'
+  'gnome-remote-desktop: Remote Login (RDP)'
   'starship: starship'
   'xdg-desktop-portal: XDG Portals'
   'zed: Zed'
@@ -62,6 +63,7 @@ optdepends=(
   'noto-fonts-cjk: session toolchain'
   'qt6-imageformats: session toolchain'
   'cliphist: session toolchain'
+  'adw-gtk-theme: session toolchain'
   'quickshell: Nyxuri Shell runtime'
   'qt6-5compat: Nyxuri Shell visual effects'
 )
