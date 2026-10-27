@@ -1,231 +1,144 @@
-<a id="readme-top"></a>
-
 <div align="right">
   <strong>English</strong> | <a href="README.zh-CN.md">简体中文</a>
 </div>
 
+# Nyxuri with remote login
+
 > [!NOTE]
-> **This is a fork** of [ech678/Nyxuri](https://github.com/ech678/Nyxuri) by Echoes678, maintained by
-> [c0de-coffee](https://github.com/c0de-coffee). Below this note is the original README.
+> This is a fork of [ech678/Nyxuri](https://github.com/ech678/Nyxuri) by Echoes678, maintained by
+> [c0de-coffee](https://github.com/c0de-coffee). **For what Nyxuri is, its units, keybindings and
+> documentation, see the original repository:** https://github.com/ech678/Nyxuri. This README only
+> covers what the fork adds and how to install the fork.
 >
-> What the fork adds:
+> Report problems with remote login here, not upstream.
 >
-> - **`remote-login` unit**: log in to the machine over RDP and land in your own headless niri
->   session, like GNOME's remote login. gnome-remote-desktop (system mode) takes the connection,
->   remote-dm (a display manager just for remote logins) shows Noctalia Greeter as the login
->   screen, and each user gets an independent session that survives disconnects.
->   `nyxuri on remote-login` sets it up (asks once for the RDP username and password);
->   `nyxuri off remote-login` puts the system back the way it was.
-> - **Remote Login panel for Noctalia**, like GNOME Settings' page: turn RDP on or off, the address
->   and certificate fingerprint to connect with, and the RDP username and password. Changes go
->   through gnome-remote-desktop's configuration service, so Noctalia's polkit agent asks for an
->   administrator password. Open it from the control center shortcut or with
->   `noctalia msg panel-toggle nyxuri/remote_login:panel`.
-> - It needs a niri with remote desktop support and remote-dm, both from the `remote-desktop`
->   branch of [c0de-coffee/niri](https://github.com/c0de-coffee/niri): install the Arch packages
->   from its [releases](https://github.com/c0de-coffee/niri/releases) (`niri-remote-desktop`,
->   `remote-dm`), or build them with the PKGBUILDs in its
->   [`packaging/`](https://github.com/c0de-coffee/niri/tree/remote-desktop/packaging). The unit
->   tells you if they're missing.
->
-> Problems with remote login belong in this repository, not upstream.
->
-> This work was done in collaboration with Claude (Anthropic's AI assistant, via Claude Code).
+> This fork was built with Claude.
 
-<div align="center">
+## What the fork adds
 
-<h1>Nyxuri</h1>
-
-<p><strong>/nɪkˈsuːri/ · A modular desktop configuration system for Arch / CachyOS</strong><br />
-<sub>Supports Niri and Noctalia — take it easy, snap your setup together, and enjoy.</sub></p>
-
-<p>
-  <a href="https://github.com/ech678/Nyxuri/stargazers"><img height="22" src="https://m3-markdown-badges.vercel.app/stars/3/3/ech678/Nyxuri" alt="Stars" /></a>
-  &nbsp;
-  <a href="https://archlinux.org"><img height="22" src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Arch/arch2.svg" alt="Arch Linux" /></a>
-  &nbsp;
-  <a href="LICENSE"><img height="22" src="https://ziadoua.github.io/m3-Markdown-Badges/badges/LicenceGPLv3/licencegplv33.svg" alt="GPL-3.0" /></a>
-</p>
-
-<a href="https://github.com/user-attachments/assets/9ef4da30-54c0-491b-916f-2f2a3beac6be">
-  <img src="https://github.com/user-attachments/assets/9ef4da30-54c0-491b-916f-2f2a3beac6be" alt="Nyxuri Preview" width="92%" />
-</a>
-
-<p>
-  <sub><em><a href="https://nyxniri.com">Website</a> · Watch demo on <a href="https://www.bilibili.com/video/BV1c63n6dEEG">Bilibili</a> · Join discussion on <a href="https://www.reddit.com/r/niri/comments/1vf53le/nyxniri_a_material_you_desktop_config_for_niri/">Reddit</a> · Read <a href="https://github.com/ech678/Nyxuri/wiki/Home">Wiki</a></em></sub>
-</p>
-<br />
-
-</div>
-
-> ⚠️ **Under Heavy Development**: The `main` branch is actively undergoing refactoring and rapid evolution. For a stable daily experience, checking out the latest release tag is recommended.
->
-> Upgrading from **NyxNiri**? The project is rebranded to **Nyxuri** (/nɪkˈsuːri/) — no longer just a rigid set of configs, but an evolving modular desktop configuration system. Running `nyxuri` automatically migrates your existing configs, snapshots, and state, then safely cleans up legacy paths.
->
-> **Note:** The built-in **Nyxuri Shell** is experimental — fully in development, known to be buggy, its look is unfinished, and it is not recommended for daily use yet. Stay on Noctalia; `nyxuri shell` is for testing only. Known issues: [shell/KNOWN-ISSUES.md](shell/KNOWN-ISSUES.md).
-
-### The Story Behind the Name
-
-Pronounced `/nɪkˈsuːri/`, it's a quiet blend of things we love:
-
-- **Nyx**: Night, calmness, and a fond nod to the project's roots as *NyxNiri*.
-- **Yukkuri** (「ゆっくり」): **Take it easy**. Ricing your Linux desktop should be a fun, relaxing journey — never a source of stress.
-- **Yuri** (「百合」): Pure, gentle everyday connections (a little personal affection from the author).
-- **...And "URI"?**: We once jokingly called it "Unified Runtime Interface" in architectural notes to sound fancy... forget that! It's honestly just here because the syllables sound so soft and sweet together (⁄ ⁄•⁄ω⁄•⁄ ⁄).
-
-## What is Nyxuri?
-
-In short, **Nyxuri is a modular desktop configuration system and management engine for Arch / CachyOS**.
-
-We are committed to long-term support for dual desktop shells (the polished **Noctalia** and our in-house **Nyxuri Shell** in active incubation), debuting on Niri and progressively expanding to more window managers. Adhering to a strict **zero-bloat, transparent, and zero-residue** philosophy, it provides:
-
-- **Multi-WM & Dual Shell Architecture**: Actions dispatch through a decoupled `shell-action.sh` gateway; natively supports **Niri** (scrolling layout) and **MangoWM** (with more Wayland compositors coming), allowing seamless transitions between Noctalia and Nyxuri Shell.
-- **Global Theme & Palette Sync**: Wallpaper sampling (with video frame extraction) drives Material You palettes across GTK 3/4, XDG Portal, Kitty, web browsers, and desktop shells in lockstep.
-- **Noctalia Companion Tools (Noctalia Tools)**:
-  - **Orbit Launcher** (`Super+A` / Mouse Forward): Vector radial menu for apps, bookmarks, and search/AI dials (TOML-configurable).
-  - **Wallpaper Picker** (`Super+W`): Unified static and live video wallpaper selector with live preview.
-  - **Selection Translate**: Fast popup translation for highlighted text.
-  - **Eye Care** (`Super+N`) & **Scratchpad** (`Super+~` drop-down Kitty floating terminal).
-- **NyxMellow Input Skin**: Dynamic theme-synced Fcitx5 skin with mellow geometry, bundled with a tuned Rime setup.
-- **Modern Terminal Experience**: Kitty terminal optimizations (smooth cursor trails, clipboard-preserving shortcuts), paired with Fish aliases and Starship prompt.
-- **Modular Capability Units**: Fastfetch, Noctalia Greeter login screen, Zed config, and wallpapers toggle independently anytime (`nyxuri on` / `nyxuri off`), incurring zero background overhead when inactive.
-- **Atomic Deployment, Presets & Zero Bloat**:
-  - **Dunder Protocol**: Any file or directory containing `__custom__` (e.g. `__custom__.kdl`, `__custom__.conf`) and `monitor.kdl` is permanently preserved across updates and preset swaps.
-  - **Presets**: Easily switch application flavor presets (e.g. Kitty opacity variants) or create custom private presets.
-  - **Zero Bloat & Clean State**: Pure Python standard library with zero pip dependencies; disabling a unit wipes deployed files with zero residue; 30-roll automatic snapshots with instant rollback, and `nyxuri doctor` for status audits.
+- **`remote-login` unit**: log in to the machine over RDP, like GNOME's remote login. You get
+  Noctalia Greeter as the login screen, then your own headless niri session, which keeps running
+  when you disconnect. Several users can be logged in at once.
+- **Remote Login panel and bar widget for Noctalia**: turn RDP on or off, see the address and
+  certificate fingerprint to connect with, change the RDP username and password; the widget shows
+  whether RDP is on and how many remote sessions there are.
+- **Fixes for a few upstream bugs**, see [Upstream bugs fixed](#upstream-bugs-fixed).
 
 ## Install
+
+Same as the original, with the fork's address.
 
 ### From a git checkout (recommended)
 
 ```bash
-# shallow clone: latest snapshot only; drop --depth 1 for full history
-git clone --depth 1 https://github.com/ech678/Nyxuri.git ~/Nyxuri
+git clone --depth 1 https://github.com/c0de-coffee/Nyxuri-remote.git ~/Nyxuri
 cd ~/Nyxuri && ./install.sh
 ```
 
 ### Standalone (online)
 
 ```bash
-curl -fsSL --connect-timeout 10 https://raw.githubusercontent.com/ech678/Nyxuri/main/install.sh | bash
+curl -fsSL --connect-timeout 10 https://raw.githubusercontent.com/c0de-coffee/Nyxuri-remote/remote-login/install.sh \
+  | NYXURI_REPO=https://github.com/c0de-coffee/Nyxuri-remote.git bash
 ```
 
-> [!TIP]
-> Auto-detects Shelly, paru, and yay; if none are installed, `nyxuri install full` automatically bootstraps `paru`.
+Don't leave out `NYXURI_REPO`: without it, the script pulls the original repository and installs
+the original.
 
 <details>
-<summary>Mirrors for China (gh-proxy / CDN)</summary>
+<summary>Mirror for China (gh-proxy)</summary>
 
 ```bash
-# Standalone via gh-proxy.org
-curl -fsSL --connect-timeout 10 https://gh-proxy.org/https://raw.githubusercontent.com/ech678/Nyxuri/main/install.sh | bash
-
-# git clone via gh-proxy.org
-git clone --depth 1 https://gh-proxy.org/https://github.com/ech678/Nyxuri.git ~/Nyxuri
+git clone --depth 1 https://gh-proxy.org/https://github.com/c0de-coffee/Nyxuri-remote.git ~/Nyxuri
 cd ~/Nyxuri && ./install.sh
 ```
 </details>
 
-### From AUR
+`nyxuri-git` on the AUR is the original, without the fork's changes.
+
+`nyxuri update` updates from the repository you installed from, that is, the fork.
+
+## Remote login
+
+### Prerequisites
+
+- **niri with remote desktop support, and remote-dm**: they aren't in the Arch repositories or the
+  AUR yet. Download `niri-remote-desktop` and `remote-dm` from
+  [c0de-coffee/niri's releases](https://github.com/c0de-coffee/niri/releases) and install them with
+  `sudo pacman -U` (`niri-remote-desktop` replaces the `niri` package). The unit tells you if
+  they're missing.
+- **No GDM**: remote-dm conflicts with it. Nyxuri's `greeter` unit (greetd + Noctalia Greeter) works
+  for local logins. If GDM was just disabled and is still running, the unit asks you to reboot
+  first.
+- gnome-remote-desktop and noctalia-greeter are installed when the unit is turned on.
+
+### Turning it on
 
 ```bash
-paru -S nyxuri-git
+nyxuri on remote-login
 ```
 
-If no AUR helper is installed in your system, build and install the `nyxuri-git` package manually:
+It:
+
+1. Checks the prerequisites above.
+2. Writes `/etc/remote-dm/config.toml`, with Noctalia Greeter as the remote login screen.
+3. If gnome-remote-desktop has no TLS certificate, creates a self-signed one
+   (`/var/lib/gnome-remote-desktop/nyxuri-rdp-tls.crt` and `.key`).
+4. If there are no RDP credentials yet, asks for them once. Enter for the username means your
+   account; Enter for the password generates a random one and shows it.
+5. Enables RDP in gnome-remote-desktop's system mode, and enables and starts remote-dm.
+6. With Noctalia installed, installs the Remote Login panel plugin.
+
+It ends by showing the port (3389 by default). The first time, it records how the system was
+before changing anything, and undoes everything if a step fails.
+
+### Turning it off
 
 ```bash
-# clone PKGBUILD repository
-git clone https://aur.archlinux.org/nyxuri-git.git
-
-# build & install
-cd nyxuri-git && makepkg -si
+nyxuri off remote-login
 ```
 
-## Architecture & Units
+Removes the panel plugin, stops remote-dm (ending all remote sessions), restores remote-dm's and
+gnome-remote-desktop's configuration and services to how they were before the unit was first
+turned on, and removes the certificate and RDP credentials it created. Packages stay installed.
 
-```text
-Nyxuri
-├── install.sh                  # lightweight bootstrap entrypoint
-├── catalog.toml                # package catalogue (18 standalone apps without dotfiles)
-├── nyxuri/                     # Python core engine (zero pip dependencies)
-├── shell/                      # Nyxuri Shell (QML/Qt6 desktop shell, experimental)
-└── units/                      # 14 modular desktop capability units
-    ├── fastfetch/              # system information
-    ├── fcitx5-rime/            # dynamic Material You input skin & Rime config
-    ├── fish/                   # shell aliases & functions
-    ├── greeter/                # Noctalia Greeter login integration
-    ├── kitty/                  # terminal emulator & opacity presets
-    ├── mango/                  # MangoWM window manager & session scripts
-    ├── niri/                   # window manager & session scripts
-    ├── noctalia/               # desktop shell, theme sync, Orbit & wallpaper picker
-    ├── remote-login/           # RDP remote login into your own headless niri session
-    ├── starship/               # prompt styling
-    ├── theme/                  # shared matugen theme template pool
-    ├── wallpapers/             # companion wallpapers & video pack hooks
-    ├── xdg-desktop-portal/     # portal routing (theme sync, screencast)
-    └── zed/                    # editor configuration
-```
+### Noctalia panel and bar widget
 
-Configs deploy atomically. Personal tweaks survive updates via the Dunder protocol: any file or folder containing `__custom__` (e.g. `__custom__.kdl`, `__custom__.conf`) and `monitor.kdl` are preserved.
+- **Panel**: like GNOME Settings' Remote Login page. Turn RDP on or off, see the address and
+  certificate fingerprint, change the RDP username and password. Changes go through
+  gnome-remote-desktop's configuration service, so Noctalia's polkit agent asks for an
+  administrator password. Open it from the control center shortcut or with
+  `noctalia msg panel-toggle nyxuri/remote_login:panel`.
+- **Bar widget**: add it in Noctalia's bar settings. With RDP on, it shows a remote desktop icon and
+  the number of remote sessions; with RDP off, a different icon.
 
-For detailed customization rules and hooks, see [Configuration Guide (Wiki)](https://github.com/ech678/Nyxuri/wiki/Configuration).
+### Connecting with a client
 
-## Presets
+You enter two passwords: the RDP username and password in the client, then your system account's
+password on the login screen. Windows' Remote Desktop Connection needs a changed `.rdp` file. Step
+by step instructions, multiple monitors and troubleshooting are in remote-dm's README:
+[Connecting](https://github.com/c0de-coffee/niri/blob/remote-desktop/remote-dm/README.md#connecting),
+[Troubleshooting](https://github.com/c0de-coffee/niri/blob/remote-desktop/remote-dm/README.md#troubleshooting).
 
-Presets layer between defaults and your `__custom__` files, so switching never touches your own tweaks. Supports modular Parts slots.
+Known issues and limitations are in
+[c0de-coffee/niri's README](https://github.com/c0de-coffee/niri/blob/remote-desktop/README.md#known-issues-and-limitations).
 
-See full official preset list, Parts architecture, and private preset setup in [Presets Guide (Wiki)](https://github.com/ech678/Nyxuri/wiki/Presets).
+## Upstream bugs fixed
 
-## Keybindings
+All reported upstream, and fixed in the fork:
 
-Core keybindings dispatch through `shell-action.sh`. Quick reference: `nyxhelp keys`.
+| Problem | Upstream issue |
+|---|---|
+| `nyxuri on` for a single unit doesn't replace the `/home/user` placeholder in its config | [#143](https://github.com/ech678/Nyxuri/issues/143) |
+| The wallpaper directory is hardcoded as `~/Pictures/Wallpapers` instead of following the XDG pictures directory (`~/图片` in Chinese, for example) | [#144](https://github.com/ech678/Nyxuri/issues/144) |
+| The installer's wallpaper pack option doesn't download the pack, so it still shows as missing | [#145](https://github.com/ech678/Nyxuri/issues/145) |
+| The GTK theme is set to adw-gtk3, but `adw-gtk-theme` isn't a dependency | [#146](https://github.com/ech678/Nyxuri/issues/146) |
+| Turning on a hook-only unit (like greeter) warns about an invalid active preset state | [#147](https://github.com/ech678/Nyxuri/issues/147) |
 
-See complete window navigation and monitor moving shortcuts in [Keybindings (Wiki)](https://github.com/ech678/Nyxuri/wiki/Keybindings).
+## License and credits
 
-## Units & Capabilities
+GPL-3.0, like the original.
 
-Desktop capabilities are atomic, modular units. Optional units include dynamic Material You fcitx5 input skin (`fcitx5-rime`), companion wallpaper and video pack (`wallpapers`), Noctalia Greeter login screen (`greeter`), and RDP remote login into your own headless niri session (`remote-login`). Toggle them on or off anytime: `nyxuri on <unit>` / `nyxuri off <unit>`.
-
-For unit lifecycle commands, see [CLI Reference (Wiki)](https://github.com/ech678/Nyxuri/wiki/CLI-Reference#units-the-market-verbs).
-
-## Tooling
-
-`nyxuri` manages install, update, snapshots, and diagnostics. Use `nyxhelp` in terminal for instant cheatsheet lookup.
-
-See full command matrix and options in [CLI Reference (Wiki)](https://github.com/ech678/Nyxuri/wiki/CLI-Reference).
-
-## Troubleshooting
-
-When encountering issues, run `nyxuri doctor` first.
-
-See full diagnostic guides and step-by-step solutions in [Troubleshooting (Wiki)](https://github.com/ech678/Nyxuri/wiki/Troubleshooting).
-
-## Credits
-
-**Contact & Community:**
-- Telegram Channel: [@linux_ricing](https://t.me/linux_ricing)
-- QQ: `2040244628` · Linux Ricing Group: `631425889`
-- Sponsor: [Afdian](https://afdian.com/a/Echoes678) · Bug reports: [GitHub Issues](https://github.com/ech678/Nyxuri/issues)
-
-**Special Thanks & Contributors:**
-- [Google Gemini](https://deepmind.google/technologies/gemini/) — burned through a pile of free Google tokens
-- [@zhuhuaian](https://github.com/zhuhuaian), [@Krits03](https://github.com/Krits03), [@Yulljie](https://github.com/Yulljie) — community management & support
-- [@TyhLxxxhLrqTq](https://github.com/TyhLxxxhLrqTq) — companion wallpaper site (in development)
-
-**Thanks to:**
-- [RanXOM/glassy-niri](https://github.com/RanXOM/glassy-niri) — blur effects reference
-- [SHORiN-KiWATA/shorin-niri](https://github.com/SHORiN-KiWATA/shorin-niri) — heavily referenced
-- [sanweiya/fcitx5-mellow-themes](https://github.com/sanweiya/fcitx5-mellow-themes) — mellow shape source for NyxMellow skin
-- [StarWhiteIsBusy/Round-Simple-Fcitx5-Skin](https://github.com/StarWhiteIsBusy/Round-Simple-Fcitx5-Skin) — Noctalia color-sync pattern reference
-- [doctorlogix](https://github.com/doctorlogix) — website design inspiration
-
-**Recommended:**
-- [h465855hgg/noctalia-lyrics](https://github.com/h465855hgg/noctalia-lyrics) — status bar lyrics widget
-- [Ocfeather/chrome-niri-opacity](https://github.com/Ocfeather/chrome-niri-opacity) — browser opacity script
-
----
-
-<div align="right">
-  <a href="#readme-top">↑ Back to Top</a>
-</div>
+Thanks to Echoes678 and everyone who works on Nyxuri, which this fork only adds to, and to
+[Noctalia](https://github.com/noctalia-dev), whose shell and greeter the remote login setup is
+built around.

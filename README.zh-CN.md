@@ -1,225 +1,120 @@
-<a id="readme-top"></a>
-
 <div align="right">
   <a href="README.md">English</a> | <strong>简体中文</strong>
 </div>
 
+# Nyxuri 远程登录 fork
+
 > [!NOTE]
-> **这是一个 fork**，原仓库是 Echoes678 的 [ech678/Nyxuri](https://github.com/ech678/Nyxuri)，
-> 由 [c0de-coffee](https://github.com/c0de-coffee) 维护。这段说明下面是原版 README。
+> 这是 [ech678/Nyxuri](https://github.com/ech678/Nyxuri)（作者 Echoes678）的 fork，由
+> [c0de-coffee](https://github.com/c0de-coffee) 维护。**Nyxuri 本身的介绍、单元说明、快捷键和文档请看原仓库**：
+> https://github.com/ech678/Nyxuri 。这里只写 fork 新增的内容，以及从 fork 安装的方法。
 >
-> 这个 fork 加了什么：
+> 远程登录相关的问题请在本仓库提，不要报给原仓库。
 >
-> - **`remote-login` 单元**：用 RDP 远程登录这台机器，进入自己独立的无头 niri 会话，和 GNOME 的远程登录一样。
->   gnome-remote-desktop（系统模式）接收连接，remote-dm（只管远程登录的显示管理器）用 Noctalia Greeter
->   作登录界面，每个用户有自己的会话，断线重连回到原来的桌面。`nyxuri on remote-login` 负责配置
->   （只在第一次问 RDP 用户名和密码），`nyxuri off remote-login` 把系统还原成原样。
-> - **Noctalia 的远程登录面板**，和 GNOME 设置里的那页一样：开关 RDP、查看连接地址和证书指纹、修改 RDP
->   用户名和密码。修改经过 gnome-remote-desktop 的配置服务，由 Noctalia 的 polkit 代理弹出管理员密码框。
->   从控制中心的快捷入口打开，或运行 `noctalia msg panel-toggle nyxuri/remote_login:panel`。
-> - 它需要带远程桌面支持的 niri 和 remote-dm，两者都在 [c0de-coffee/niri](https://github.com/c0de-coffee/niri)
->   的 `remote-desktop` 分支：从它的 [Releases](https://github.com/c0de-coffee/niri/releases) 下载 Arch 包
->   （`niri-remote-desktop`、`remote-dm`）安装，或者用 [`packaging/`](https://github.com/c0de-coffee/niri/tree/remote-desktop/packaging)
->   下的 PKGBUILD 自己编译。缺了的话单元会提示。
->
-> 远程登录相关的问题请在这个仓库提，不要找原作者。
->
-> 这些改动是和 Claude（Anthropic 的 AI 助手，通过 Claude Code）协作完成的。
+> 这个 fork 的工作是用 Claude 完成的。
 
-<div align="center">
+## fork 新增了什么
 
-<h1>Nyxuri</h1>
-
-<p><strong>/nɪkˈsuːri/ · Arch / CachyOS 上的模块化桌面配置系统</strong><br />
-<sub>支持 Niri 与 Noctalia —— 慢慢来，搭好属于你的干净日常 (ゆっくりしていってね！)</sub></p>
-
-<p>
-  <a href="https://github.com/ech678/Nyxuri/stargazers"><img height="22" src="https://m3-markdown-badges.vercel.app/stars/3/3/ech678/Nyxuri" alt="Stars" /></a>
-  &nbsp;
-  <a href="https://archlinux.org"><img height="22" src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Arch/arch2.svg" alt="Arch Linux" /></a>
-  &nbsp;
-  <a href="LICENSE"><img height="22" src="https://ziadoua.github.io/m3-Markdown-Badges/badges/LicenceGPLv3/licencegplv33.svg" alt="GPL-3.0" /></a>
-</p>
-
-<a href="https://github.com/user-attachments/assets/9ef4da30-54c0-491b-916f-2f2a3beac6be">
-  <img src="https://github.com/user-attachments/assets/9ef4da30-54c0-491b-916f-2f2a3beac6be" alt="Nyxuri 预览" width="92%" />
-</a>
-
-<p>
-  <sub><em><a href="https://nyxniri.com">官网</a> · 观看 <a href="https://www.bilibili.com/video/BV1c63n6dEEG">Bilibili 演示</a> · 参与 <a href="https://www.reddit.com/r/niri/comments/1vf53le/nyxniri_a_material_you_desktop_config_for_niri/">Reddit 讨论</a> · 查阅 <a href="https://github.com/ech678/Nyxuri/wiki/Home-zh">Wiki</a></em></sub>
-</p>
-<br />
-
-</div>
-
-> ⚠️ **开发警告**：当前 `main` 主分支正在重构与演进中（代码与配置结构随时可能变化）。如果你追求日常平稳，建议检出最新 Release 标签使用。
->
-> 从原 **NyxNiri** 迁移？项目现已更名为 **Nyxuri**（/nɪkˈsuːri/），它不再只是一份死板的单套配置，而是演进为一套完全解耦的模块化桌面配置系统。运行 `nyxuri` 会自动把旧配置和快照安全搬家，并清理旧路径。
->
-> **注意：** 自研的 **Nyxuri Shell** 目前是实验性功能——完全处于开发阶段、已知问题较多、外观尚未完工，暂不推荐日常使用。日常请留在 Noctalia，`nyxuri shell` 仅供测试。已知问题见 [shell/KNOWN-ISSUES.md](shell/KNOWN-ISSUES.md)。
-
-### 名字的小秘密
-
-名字读作 `/nɪkˈsuːri/`，是把几样喜欢的事情悄悄拼在一起的产物：
-
-- **Nyx**：夜之女神，也是宁静夜晚的陪伴（以及老名字 NyxNiri 的念想）。
-- **Yukkuri**（ゆっくり / にゅっくり）：**放轻松，慢慢来**。折腾 Linux 桌面本就该是件治愈开心的事，不要急躁，随心就好。
-- **Yuri**（百合 / ゆり）：纯粹美好的日常与女孩子之间的羁绊（作者的小小私心）。
-- **…至于 URI？**：早先在架构文档里硬编过一个叫“统一运行时接口 (Unified Runtime Interface)”的唬人缩写……忘掉它吧！其实真的只是因为读起来软软糯糯很顺口而已啦 (⁄ ⁄•⁄ω⁄•⁄ ⁄)
-
-## 它是什么
-
-简单来说，**Nyxuri 是一套面向 Arch / CachyOS 的模块化桌面配置系统与管理引擎**。
-
-我们致力于长期提供双桌面外壳（成熟稳健的 **Noctalia** 与正在孵化打磨的自研 **Nyxuri Shell**），以 Niri 为首发基座，并逐步接入更多平铺与浮动窗口管理器。系统坚守**零臃肿、无暗箱、无残留**的减法原则，开箱即用的功能包括：
-
-- **多 WM 协同与双外壳架构**：核心动作经由 `shell-action.sh` 网关彻底解耦；原生支持 **Niri**（滚动平铺）与 **MangoWM**（平铺与浮动），并持续扩展更多 Wayland 合成器；外壳层支持 Noctalia 与 Nyxuri Shell 自由选择与无缝过渡。
-- **全域色彩与明暗联动**：壁纸取色（动态视频实时抽帧）驱动全局 Material You 配色，GTK 3/4、XDG Portal、Kitty、主流浏览器与外壳深浅色同步流转。
-- **Noctalia 伴生工具集 (Noctalia Tools)**：
-  - **Orbit 启动器**（`Super+A` / 鼠标侧键）：矢量星环轮盘，集成常用应用、网址与 AI/搜索转盘（TOML 全自定义）。
-  - **壁纸选择器**（`Super+W`）：静态图片与动态视频壁纸统一检索与实时预览。
-  - **划词翻译**：选中文本即刻弹出轻量释义。
-  - **护眼模式**（`Super+N`）与 **Scratchpad**（`Super+~` Kitty 浮动终端）。
-- **NyxMellow 输入法**：跟随系统配色的动态 fcitx5 皮肤（mellow 圆角几何），附带开箱即用的 Rime 输入配置。
-- **现代终端体验**：Kitty 平滑光标轨迹与防冲快捷键，搭配 Fish 实用别名与 Starship 提示符。
-- **即插即用的原子单元**：Fastfetch 看板、Noctalia Greeter 登录界面、Zed 编辑器与壁纸包，单键启闭（`nyxuri on` / `nyxuri off`），未启用单元零常驻、零开销。
-- **原子部署、预设与零臃肿安全网**：
-  - **Dunder 保护协议**：任何文件名含 `__custom__`（如 `__custom__.kdl`、`__custom__.conf`）或 `monitor.kdl` 的文件跨更新与预设切换永久保留，绝不覆盖用户私有改动。
-  - **分层预设**：支持 Kitty 透明度等风味预设一键切换，并支持用户私有预设制作。
-  - **零臃肿与白纸抹除**：引擎坚持纯 Python 标准库驱动，零 pip 依赖；停用单元即刻安全抹白无残留；30 轮滚动快照随时一键回退，`nyxuri doctor` 实时对账实机与声明状态。
+- **`remote-login` 单元**：像 GNOME 一样用 RDP 远程登录这台电脑。连上后先看到 Noctalia Greeter 登录界面，登录后进入自己独立的无头 niri 会话。断开后会话继续运行，可以多人同时登录。
+- **Noctalia 的"远程登录"面板和顶栏组件**：开关 RDP、查看连接地址和证书指纹、修改 RDP 用户名和密码；顶栏显示 RDP 是否开启、当前有几个远程会话。
+- **修复了原仓库的几个问题**，见[修复的原仓库问题](#修复的原仓库问题)。
 
 ## 安装
 
-### 从 Git 仓库安装（推荐）
+从 fork 安装，用法和原版一样，只是地址换成 fork。
+
+### 从 git 仓库安装（推荐）
 
 ```bash
-# 浅克隆：只拉最新快照；要完整历史去掉 --depth 1
-git clone --depth 1 https://github.com/ech678/Nyxuri.git ~/Nyxuri
+git clone --depth 1 https://github.com/c0de-coffee/Nyxuri-remote.git ~/Nyxuri
 cd ~/Nyxuri && ./install.sh
 ```
 
-### 独立在线安装
+### 在线安装
 
 ```bash
-curl -fsSL --connect-timeout 10 https://raw.githubusercontent.com/ech678/Nyxuri/main/install.sh | bash
+curl -fsSL --connect-timeout 10 https://raw.githubusercontent.com/c0de-coffee/Nyxuri-remote/remote-login/install.sh \
+  | NYXURI_REPO=https://github.com/c0de-coffee/Nyxuri-remote.git bash
 ```
 
-> [!TIP]
-> 自动支持 Shelly、paru、yay；均未安装时，`nyxuri install full` 会自动装好 `paru`。
+`NYXURI_REPO` 不能省：不设的话，安装脚本会去拉原仓库，装上的就是原版。
 
 <details>
-<summary>国内镜像加速（gh-proxy / CDN）</summary>
+<summary>国内网络（gh-proxy）</summary>
 
 ```bash
-# 通过 gh-proxy.org 独立安装
-curl -fsSL --connect-timeout 10 https://gh-proxy.org/https://raw.githubusercontent.com/ech678/Nyxuri/main/install.sh | bash
-
-# 通过 gh-proxy.org 克隆仓库
-git clone --depth 1 https://gh-proxy.org/https://github.com/ech678/Nyxuri.git ~/Nyxuri
+git clone --depth 1 https://gh-proxy.org/https://github.com/c0de-coffee/Nyxuri-remote.git ~/Nyxuri
 cd ~/Nyxuri && ./install.sh
 ```
 </details>
 
-### 从 AUR 安装
+AUR 上的 `nyxuri-git` 是原版，不包含 fork 的改动。
+
+以后执行 `nyxuri update`，会从你安装时用的仓库（也就是 fork）更新。
+
+## 远程登录
+
+### 前置条件
+
+- **带远程桌面支持的 niri 和 remote-dm**：Arch 官方源和 AUR 里都还没有，要从
+  [c0de-coffee/niri 的 Releases](https://github.com/c0de-coffee/niri/releases) 下载
+  `niri-remote-desktop` 和 `remote-dm` 两个包，用 `sudo pacman -U` 安装（会替换官方的 `niri` 包）。缺了它们，单元会提示你去下载。
+- **不能用 GDM**：remote-dm 和 GDM 冲突。用 Nyxuri 的 `greeter` 单元（greetd + Noctalia Greeter）做本机登录就行。如果刚停用 GDM 还没重启，单元会提示先重启。
+- gnome-remote-desktop 和 noctalia-greeter 会在开启单元时自动安装。
+
+### 开启
 
 ```bash
-paru -S nyxuri-git
+nyxuri on remote-login
 ```
 
-若系统未安装 AUR 助手，可手动构建并安装 `nyxuri-git` 软件包：
+它会依次：
+
+1. 检查上面的前置条件。
+2. 写入 `/etc/remote-dm/config.toml`，让远程登录界面使用 Noctalia Greeter。
+3. 如果 gnome-remote-desktop 还没有 TLS 证书，生成一个自签名证书（`/var/lib/gnome-remote-desktop/nyxuri-rdp-tls.crt` 和 `.key`）。
+4. 如果还没有 RDP 用户名和密码，问你一次。用户名直接回车就是当前账户；密码直接回车会生成一个随机密码并显示出来。
+5. 开启 gnome-remote-desktop 系统模式的 RDP，启用并启动 remote-dm。
+6. 装了 Noctalia 的话，安装"远程登录"面板插件。
+
+完成后会显示端口（默认 3389）。第一次开启时会先记下系统原来的状态，中途有一步失败就自动还原。
+
+### 关闭
 
 ```bash
-# 克隆 PKGBUILD 仓库
-git clone https://aur.archlinux.org/nyxuri-git.git
-
-# 构建并安装
-cd nyxuri-git && makepkg -si
+nyxuri off remote-login
 ```
 
-## 架构与单元
+删掉面板插件，停止 remote-dm（会结束所有远程会话），把 remote-dm 和 gnome-remote-desktop 的配置和服务状态还原成第一次开启之前的样子，并删掉开启时生成的证书和 RDP 用户名密码。软件包不会卸载。
 
-```text
-Nyxuri
-├── install.sh                  # 极简引导入口
-├── catalog.toml                # 软件目录清单（18 款日常软件同源依赖）
-├── nyxuri/                     # Python 核心引擎（零 pip 依赖）
-├── shell/                      # Nyxuri Shell（自研 QML/Qt6 桌面外壳，实验性）
-└── units/                      # 14 个独立原子桌面能力单元
-    ├── fastfetch/              # 系统信息展示
-    ├── fcitx5-rime/            # 动态 Material You 输入法皮肤与配置
-    ├── fish/                   # Shell 别名与实用函数
-    ├── greeter/                # Noctalia Greeter 登录界面集成
-    ├── kitty/                  # 终端模拟器与透明度预设
-    ├── mango/                  # MangoWM 窗口管理器与动作调度脚本
-    ├── niri/                   # 窗口管理器与动作调度脚本
-    ├── noctalia/               # 桌面外壳、主题同步、Orbit 星环与壁纸选择器
-    ├── remote-login/           # RDP 远程登录，进入自己的无头 niri 会话
-    ├── starship/               # 终端提示符
-    ├── theme/                  # 共享 matugen 主题模板池
-    ├── wallpapers/             # 配套壁纸与动态视频包下载钩子
-    ├── xdg-desktop-portal/     # Portal 路由（主题与录屏分流）
-    └── zed/                    # 代码编辑器配置
-```
+### Noctalia 面板和顶栏组件
 
-配置采用原子物理替换。个人改动通过 Dunder 协议保留：任何文件名或目录名含 `__custom__` 的文件（如 `__custom__.kdl`、`__custom__.conf`）与 `monitor.kdl` 在更新时自动保留。
+- **面板**：和 GNOME 设置里的"远程登录"页面类似，可以开关 RDP，查看连接地址和证书指纹，修改 RDP 用户名和密码。修改要通过 gnome-remote-desktop 的配置服务，Noctalia 的 polkit 代理会弹窗要管理员密码。从控制中心的快捷按钮打开，或者执行
+  `noctalia msg panel-toggle nyxuri/remote_login:panel`。
+- **顶栏组件**：在 Noctalia 的顶栏设置里添加。RDP 开着时显示远程桌面图标和当前远程会话数，关着时显示另一个图标。
 
-自定义规则与部署后钩子见 [配置与自定义 (Wiki)](https://github.com/ech678/Nyxuri/wiki/Configuration-zh)。
+### 用客户端连接
 
-## 预设
+连接时要输入两次密码：先是客户端问的 RDP 用户名和密码，再是登录界面里的系统账户密码。Windows 自带的远程桌面连接要先改 `.rdp` 文件。详细步骤、多显示器和排错见 remote-dm 的说明：
+[客户端连接](https://github.com/c0de-coffee/niri/blob/remote-desktop/remote-dm/README.zh-CN.md#客户端连接)、
+[排错](https://github.com/c0de-coffee/niri/blob/remote-desktop/remote-dm/README.zh-CN.md#排错)。
 
-预设叠在默认配置和你的 `__custom__` 之间，切换不会碰你的自定义改动。支持零件插槽化组合。
+已知问题和限制见 [c0de-coffee/niri 的 README](https://github.com/c0de-coffee/niri/blob/remote-desktop/README.zh-CN.md#已知问题和限制)。
 
-官方预设清单、Parts 插槽机制与私有预设制作见 [预设手册 (Wiki)](https://github.com/ech678/Nyxuri/wiki/Presets-zh)。
+## 修复的原仓库问题
 
-## 快捷键
+这些问题都已经在原仓库提了 issue，fork 里已经修好：
 
-核心快捷键通过 `shell-action.sh` 网关调度，保证合成器与桌面外壳解耦。快速查看：`nyxhelp keys`。
+| 问题 | 原仓库 issue |
+|---|---|
+| 单独执行 `nyxuri on` 某个单元时，配置里的 `/home/user` 占位符不会被替换 | [#143](https://github.com/ech678/Nyxuri/issues/143) |
+| 壁纸目录写死为 `~/Pictures/Wallpapers`，和中文环境的 `~/图片` 等 XDG 图片目录不一致 | [#144](https://github.com/ech678/Nyxuri/issues/144) |
+| 安装器勾选"壁纸包"后不会下载壁纸包，装完仍然显示缺少 | [#145](https://github.com/ech678/Nyxuri/issues/145) |
+| GTK 主题设成 adw-gtk3，但 `adw-gtk-theme` 没有列进依赖 | [#146](https://github.com/ech678/Nyxuri/issues/146) |
+| 开启只有钩子的单元（比如 greeter）时，误报"活动预设状态无效" | [#147](https://github.com/ech678/Nyxuri/issues/147) |
 
-完整窗口控制、多屏漫游按键表与全屏覆盖层见 [快捷键全景图 (Wiki)](https://github.com/ech678/Nyxuri/wiki/Keybindings-zh)。
+## 许可证和致谢
 
-## 单元能力
+和原版一样使用 GPL-3.0。
 
-桌面上一切能力皆为可独立开关的原子单元。可选单元包括动态取色 Fcitx5 皮肤（`fcitx5-rime`）、配套壁纸与视频包（`wallpapers`），一致视觉的 Noctalia Greeter 登录界面（`greeter`），以及 RDP 远程登录、进入自己的无头 niri 会话（`remote-login`）。随时单键启闭：`nyxuri on <unit>` / `nyxuri off <unit>`。
-
-单元生命周期管理详见 [CLI 命令手册 (Wiki)](https://github.com/ech678/Nyxuri/wiki/CLI-Reference-zh#单元市场动词)。
-
-## 工具
-
-`nyxuri` 管理安装、更新、配置快照与系统诊断，终端内随时可用 `nyxhelp` 速查。
-
-全量子命令、参数选项与 Shell 别名见 [CLI 命令手册 (Wiki)](https://github.com/ech678/Nyxuri/wiki/CLI-Reference-zh)。
-
-## 故障排除
-
-遇到启动卡死、双显卡渲染异常或样式白屏时，优先运行 `nyxuri doctor`。
-
-详细排障步骤与完整清单见 [故障排除指南 (Wiki)](https://github.com/ech678/Nyxuri/wiki/Troubleshooting-zh)。
-
-## 致谢与社区
-
-**联系与社区：**
-- TG 频道：[@linux_ricing](https://t.me/linux_ricing)
-- QQ：`2040244628` · Linux Ricing 交流群：`631425889`
-- 赞助：[爱发电](https://afdian.com/a/Echoes678) · 问题反馈：[GitHub Issues](https://github.com/ech678/Nyxuri/issues)
-
-**协作与鸣谢：**
-- [Google Gemini](https://deepmind.google/technologies/gemini/) — 白嫖了谷歌一堆 token
-- [@zhuhuaian](https://github.com/zhuhuaian) · [@Krits03](https://github.com/Krits03) · [@Yulljie](https://github.com/Yulljie) — 社区管理与情感支持
-- [@TyhLxxxhLrqTq](https://github.com/TyhLxxxhLrqTq) — 配套壁纸站支持（开发中）
-
-**致谢：**
-- [RanXOM/glassy-niri](https://github.com/RanXOM/glassy-niri) — blur 效果参考
-- [SHORiN-KiWATA/shorin-niri](https://github.com/SHORiN-KiWATA/shorin-niri) — 抄了很多！
-- [sanweiya/fcitx5-mellow-themes](https://github.com/sanweiya/fcitx5-mellow-themes) — NyxMellow 皮肤圆角形状来源
-- [StarWhiteIsBusy/Round-Simple-Fcitx5-Skin](https://github.com/StarWhiteIsBusy/Round-Simple-Fcitx5-Skin) — Noctalia 取色联动方案参考
-- [doctorlogix](https://github.com/doctorlogix) — 官网设计借鉴
-
-**推荐项目：**
-- [h465855hgg/noctalia-lyrics](https://github.com/h465855hgg/noctalia-lyrics) — 状态栏歌词组件
-- [Ocfeather/chrome-niri-opacity](https://github.com/Ocfeather/chrome-niri-opacity) — 浏览器透明度脚本
-
----
-
-<div align="right">
-  <a href="#readme-top">↑ 返回顶部</a>
-</div>
+感谢 Echoes678 和 Nyxuri 的所有贡献者，这个 fork 只是在 Nyxuri 上加了一些东西；也感谢 [Noctalia](https://github.com/noctalia-dev)，远程登录的设置面板和登录界面都是围绕它的桌面和登录界面做的。
