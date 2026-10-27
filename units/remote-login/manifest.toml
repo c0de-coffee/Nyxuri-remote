@@ -5,7 +5,7 @@
 # plugin (hooks/noctalia-plugin/) goes to ~/.local/share/noctalia/plugins/remote_login while on.
 #
 # remote-dm and a niri with remote desktop support have no repo/AUR packages yet: the activate
-# hook checks for them and points at the release packages (https://github.com/c0de-coffee/niri/releases;
+# hook checks for them and points at the release packages (https://github.com/c0de-coffee/niri-remote/releases;
 # PKGBUILDs in packaging/ of its remote-desktop branch).
 optional = true
 packages = ["gnome-remote-desktop"]

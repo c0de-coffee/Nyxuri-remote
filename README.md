@@ -64,7 +64,7 @@ cd ~/Nyxuri && ./install.sh
 
 - **niri with remote desktop support, and remote-dm**: they aren't in the Arch repositories or the
   AUR yet. Download `niri-remote-desktop` and `remote-dm` from
-  [c0de-coffee/niri's releases](https://github.com/c0de-coffee/niri/releases) and install them with
+  [c0de-coffee/niri-remote's releases](https://github.com/c0de-coffee/niri-remote/releases) and install them with
   `sudo pacman -U` (`niri-remote-desktop` replaces the `niri` package). The unit tells you if
   they're missing.
 - **No GDM**: remote-dm conflicts with it. Nyxuri's `greeter` unit (greetd + Noctalia Greeter) works
@@ -117,11 +117,11 @@ turned on, and removes the certificate and RDP credentials it created. Packages 
 You enter two passwords: the RDP username and password in the client, then your system account's
 password on the login screen. Windows' Remote Desktop Connection needs a changed `.rdp` file. Step
 by step instructions, multiple monitors and troubleshooting are in remote-dm's README:
-[Connecting](https://github.com/c0de-coffee/niri/blob/remote-desktop/remote-dm/README.md#connecting),
-[Troubleshooting](https://github.com/c0de-coffee/niri/blob/remote-desktop/remote-dm/README.md#troubleshooting).
+[Connecting](https://github.com/c0de-coffee/niri-remote/blob/remote-desktop/remote-dm/README.md#connecting),
+[Troubleshooting](https://github.com/c0de-coffee/niri-remote/blob/remote-desktop/remote-dm/README.md#troubleshooting).
 
 Known issues and limitations are in
-[c0de-coffee/niri's README](https://github.com/c0de-coffee/niri/blob/remote-desktop/README.md#known-issues-and-limitations).
+[c0de-coffee/niri-remote's README](https://github.com/c0de-coffee/niri-remote/blob/remote-desktop/README.md#known-issues-and-limitations).
 
 ## Upstream bugs fixed
 

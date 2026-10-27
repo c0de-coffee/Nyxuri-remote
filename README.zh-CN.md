@@ -57,7 +57,7 @@ AUR 上的 `nyxuri-git` 是原版，不包含 fork 的改动。
 ### 前置条件
 
 - **带远程桌面支持的 niri 和 remote-dm**：Arch 官方源和 AUR 里都还没有，要从
-  [c0de-coffee/niri 的 Releases](https://github.com/c0de-coffee/niri/releases) 下载
+  [c0de-coffee/niri-remote 的 Releases](https://github.com/c0de-coffee/niri-remote/releases) 下载
   `niri-remote-desktop` 和 `remote-dm` 两个包，用 `sudo pacman -U` 安装（会替换官方的 `niri` 包）。缺了它们，单元会提示你去下载。
 - **不能用 GDM**：remote-dm 和 GDM 冲突。用 Nyxuri 的 `greeter` 单元（greetd + Noctalia Greeter）做本机登录就行。如果刚停用 GDM 还没重启，单元会提示先重启。
 - gnome-remote-desktop 和 noctalia-greeter 会在开启单元时自动安装。
@@ -96,10 +96,10 @@ nyxuri off remote-login
 ### 用客户端连接
 
 连接时要输入两次密码：先是客户端问的 RDP 用户名和密码，再是登录界面里的系统账户密码。Windows 自带的远程桌面连接要先改 `.rdp` 文件。详细步骤、多显示器和排错见 remote-dm 的说明：
-[客户端连接](https://github.com/c0de-coffee/niri/blob/remote-desktop/remote-dm/README.zh-CN.md#客户端连接)、
-[排错](https://github.com/c0de-coffee/niri/blob/remote-desktop/remote-dm/README.zh-CN.md#排错)。
+[客户端连接](https://github.com/c0de-coffee/niri-remote/blob/remote-desktop/remote-dm/README.zh-CN.md#客户端连接)、
+[排错](https://github.com/c0de-coffee/niri-remote/blob/remote-desktop/remote-dm/README.zh-CN.md#排错)。
 
-已知问题和限制见 [c0de-coffee/niri 的 README](https://github.com/c0de-coffee/niri/blob/remote-desktop/README.zh-CN.md#已知问题和限制)。
+已知问题和限制见 [c0de-coffee/niri-remote 的 README](https://github.com/c0de-coffee/niri-remote/blob/remote-desktop/README.zh-CN.md#已知问题和限制)。
 
 ## 修复的原仓库问题
 
