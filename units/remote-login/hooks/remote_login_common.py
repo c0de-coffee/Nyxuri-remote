@@ -243,6 +243,45 @@ def install_plugin():
     return True, enabled
 
 
+OVERLAY_SOURCE = Path(__file__).resolve().parent / "noctalia-remote-session"
+
+
+def overlay_dir():
+    """Noctalia config overlays for remote sessions only, layered by niri's session-shell.sh."""
+    config = os.environ.get("XDG_CONFIG_HOME") or str(Path.home() / ".config")
+    # __custom__: kept when Nyxuri redeploys the noctalia unit.
+    return Path(config) / "noctalia" / "remote-session__custom__"
+
+
+def install_overlay():
+    """Copy our remote-session overlays in (takes effect from the next remote login)."""
+    dest = overlay_dir()
+    try:
+        dest.mkdir(parents=True, exist_ok=True)
+        for source in sorted(OVERLAY_SOURCE.glob("*.toml")):
+            target = dest / source.name
+            content = source.read_bytes()
+            if not target.is_file() or target.read_bytes() != content:
+                target.write_bytes(content)
+    except OSError:
+        return False
+    return True
+
+
+def remove_overlay():
+    """Remove our overlays; the dir goes too when nothing else is left in it."""
+    dest = overlay_dir()
+    for source in OVERLAY_SOURCE.glob("*.toml"):
+        try:
+            (dest / source.name).unlink()
+        except FileNotFoundError:
+            pass
+    try:
+        dest.rmdir()
+    except OSError:
+        pass
+
+
 def remove_plugin():
     if shutil.which("noctalia"):
         run(["noctalia", "msg", "plugins", "disable", PLUGIN_ID], capture=True)

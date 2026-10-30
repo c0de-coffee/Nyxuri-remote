@@ -51,4 +51,26 @@ if [ "$active_shell" = "nyxuri-shell" ] || [ "$active_shell" = "custom" ]; then
         echo "Nyxuri shell (${custom_shell_bin:-<unset>}) is not executable, falling back to Noctalia" >&2
     fi
 fi
+# Remote sessions (logind Remote=yes, e.g. started by remote-dm): layer the *.toml files in
+# ~/.config/noctalia/remote-session__custom__/ over the normal config. Noctalia reads every *.toml in its
+# config dir (not subdirs) in name order, so a per-session mirror of symlinks with the overlays
+# sorted last does it. The remote-login unit uses this to turn off idle suspend, which logind
+# refuses for remote sessions anyway.
+noctalia_remote_overlay() {
+    local cfg="${XDG_CONFIG_HOME:-$HOME/.config}/noctalia"
+    local overlay="$cfg/remote-session__custom__" mirror f
+    [ -n "${XDG_SESSION_ID:-}" ] && [ -n "${XDG_RUNTIME_DIR:-}" ] || return 0
+    [ "$(loginctl show-session "$XDG_SESSION_ID" -p Remote --value 2>/dev/null)" = yes ] || return 0
+    compgen -G "$overlay/*.toml" >/dev/null || return 0
+    mirror="$XDG_RUNTIME_DIR/noctalia-session-$XDG_SESSION_ID"
+    rm -rf "$mirror" && mkdir -p "$mirror/noctalia" || return 0
+    for f in "$cfg"/*; do
+        [ "$f" = "$overlay" ] || ln -s "$f" "$mirror/noctalia/"
+    done
+    for f in "$overlay"/*.toml; do
+        ln -s "$f" "$mirror/noctalia/zz-remote-session-${f##*/}"
+    done
+    export NOCTALIA_CONFIG_HOME="$mirror"
+}
+noctalia_remote_overlay || true
 exec noctalia

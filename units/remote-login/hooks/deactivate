@@ -25,6 +25,7 @@ def main():
         print(msg("remote_login_state_invalid", str(common.STATE)))
         return 1
     common.remove_plugin()
+    common.remove_overlay()
     if state is None:
         print(msg("remote_login_nothing_to_undo"))
         return 0

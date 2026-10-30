@@ -1,0 +1,6 @@
+# Remote sessions only (layered by niri's session-shell.sh, deployed by the remote-login unit to
+# ~/.config/noctalia/remote-session__custom__/). logind lets only the local active session suspend without
+# a password, so Noctalia's idle suspend just fails and logs here; suspending an idle machine is
+# left to a system-wide timer. The behavior id is the one in Noctalia's default config.
+[idle.behavior.lock-and-suspend]
+enabled = false

@@ -3,6 +3,9 @@
 # remote logins) + Noctalia Greeter as the login screen. /etc, /var/lib, root and systemd side
 # effects are all declared here and undone by `off`. With Noctalia installed, a settings panel
 # plugin (hooks/noctalia-plugin/) goes to ~/.local/share/noctalia/plugins/remote_login while on.
+# Also while on: hooks/noctalia-remote-session/*.toml go to ~/.config/noctalia/remote-session__custom__/,
+# which niri's session-shell.sh layers over Noctalia's config in remote sessions only (turns off
+# idle suspend there, since logind refuses it for remote sessions).
 #
 # remote-dm and a niri with remote desktop support have no repo/AUR packages yet: the activate
 # hook checks for them and points at the release packages (https://github.com/c0de-coffee/niri-remote/releases;
