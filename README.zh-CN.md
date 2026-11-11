@@ -96,8 +96,8 @@ nyxuri off remote-login
 ### 用客户端连接
 
 连接时要输入两次密码：先是客户端问的 RDP 用户名和密码，再是登录界面里的系统账户密码。Windows 自带的远程桌面连接要先改 `.rdp` 文件。详细步骤、多显示器和排错见 remote-dm 的说明：
-[客户端连接](https://github.com/c0de-coffee/niri-remote/blob/remote-desktop/remote-dm/README.zh-CN.md#客户端连接)、
-[排错](https://github.com/c0de-coffee/niri-remote/blob/remote-desktop/remote-dm/README.zh-CN.md#排错)。
+[客户端连接](https://github.com/c0de-coffee/remote-dm/blob/main/README.zh-CN.md#客户端连接)、
+[排错](https://github.com/c0de-coffee/remote-dm/blob/main/README.zh-CN.md#排错)。
 
 已知问题和限制见 [c0de-coffee/niri-remote 的 README](https://github.com/c0de-coffee/niri-remote/blob/remote-desktop/README.zh-CN.md#已知问题和限制)。
 

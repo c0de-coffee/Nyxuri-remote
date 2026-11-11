@@ -117,8 +117,8 @@ turned on, and removes the certificate and RDP credentials it created. Packages 
 You enter two passwords: the RDP username and password in the client, then your system account's
 password on the login screen. Windows' Remote Desktop Connection needs a changed `.rdp` file. Step
 by step instructions, multiple monitors and troubleshooting are in remote-dm's README:
-[Connecting](https://github.com/c0de-coffee/niri-remote/blob/remote-desktop/remote-dm/README.md#connecting),
-[Troubleshooting](https://github.com/c0de-coffee/niri-remote/blob/remote-desktop/remote-dm/README.md#troubleshooting).
+[Connecting](https://github.com/c0de-coffee/remote-dm#connecting),
+[Troubleshooting](https://github.com/c0de-coffee/remote-dm#troubleshooting).
 
 Known issues and limitations are in
 [c0de-coffee/niri-remote's README](https://github.com/c0de-coffee/niri-remote/blob/remote-desktop/README.md#known-issues-and-limitations).
